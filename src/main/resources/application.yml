@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: School-Management
+  data:
+    mongodb:
+      database: schooldb
+      uri: mongodb+srv://matrutvaedu_db_user:9ULvllaXISA05sbu@matrutva-prod-cluster.xvb94fm.mongodb.net/?appName=matrutva-prod-cluster
+
+server:
+  port: 8080
+
+jwt:
+  secret: TMdEynvR9OqHbOO3+Mwal697ilGOyA6vqdBNcmN3YLBiq0zE6MgaU08Jc26GhpOGfmWtPer2mPbpFunQHVB9Zg==
+  expiration-ms: 3600000 # 1 hour
+  refresh-expiration-ms: 7776000000 # 90 days
+
+app:
+  default-tenant-id: default_tenant

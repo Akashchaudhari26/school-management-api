@@ -1,0 +1,92 @@
+{
+  "info": {
+    "name": "SMS - Fee Module",
+    "description": "Fee Management APIs for School Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Fee - Rohan Bhatia",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/fees",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "fees"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentId\": \"693c079c90f38037ee050852\",\n  \"academicYear\": \"{{academicYear}}\",\n  \"feeItems\": [\n    { \"name\": \"Tuition Fee\", \"amount\": 25000 },\n    { \"name\": \"Activity Fee\", \"amount\": 3000 },\n    { \"name\": \"Transport Fee\", \"amount\": 5000 }\n  ]\n}"
+        }
+      }
+    },
+    {
+      "name": "Create Fee - Advait Chopra",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/fees",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "fees"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentId\": \"693c078990f38037ee050850\",\n  \"academicYear\": \"{{academicYear}}\",\n  \"feeItems\": [\n    { \"name\": \"Tuition Fee\", \"amount\": 24000 },\n    { \"name\": \"Activity Fee\", \"amount\": 3000 }\n  ]\n}"
+        }
+      }
+    },
+    {
+      "name": "Get Fee By Student",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/fees/student/{{studentId}}/{{academicYear}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "fees", "student", "{{studentId}}", "{{academicYear}}"]
+        }
+      }
+    },
+    {
+      "name": "Pay Fee - Partial Payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/fees/{{feeId}}/pay",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "fees", "{{feeId}}", "pay"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 15000,\n  \"mode\": \"UPI\",\n  \"referenceNo\": \"UPI-001\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Pay Fee - Final Payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/fees/{{feeId}}/pay",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "fees", "{{feeId}}", "pay"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 18000,\n  \"mode\": \"CASH\",\n  \"referenceNo\": \"CASH-002\"\n}"
+        }
+      }
+    }
+  ]
+}

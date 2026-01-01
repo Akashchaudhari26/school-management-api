@@ -1,0 +1,378 @@
+{
+	"info": {
+		"_postman_id": "b53f8a9e-1234-5678-9abc-def123456789",
+		"name": "SMS - Attendance Module",
+		"description": "Professional Attendance Module Collection for School Management System.\n\nIncludes:\n- Single & Bulk Marking\n- Class & Section Reports\n- Monthly Calendar Ranges\n- Staff Attendance\n- Dashboard Analytics",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Marking (Write Ops)",
+			"item": [
+				{
+					"name": "Mark Single Attendance",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "TEACHER-123",
+								"description": "ID of the teacher/admin marking attendance",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"693b0f1df532103f6a0bcc80\",\n    \"userType\": \"STUDENT\",\n    \"date\": \"2024-10-15\",\n    \"status\": \"PRESENT\",\n    \"remarks\": \"Arrived on time\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attendance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Bulk Attendance (Real Data)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "TEACHER-123",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"userId\": \"693b0f1df532103f6a0bcc80\",\n        \"userType\": \"STUDENT\",\n        \"date\": \"2024-10-15\",\n        \"status\": \"PRESENT\"\n    },\n    {\n        \"userId\": \"693b0ef6f532103f6a0bcc7a\",\n        \"userType\": \"STUDENT\",\n        \"date\": \"2024-10-15\",\n        \"status\": \"ABSENT\",\n        \"remarks\": \"Sick Leave\"\n    },\n    {\n        \"userId\": \"693b0efcf532103f6a0bcc7b\",\n        \"userType\": \"STUDENT\",\n        \"date\": \"2024-10-15\",\n        \"status\": \"PRESENT\"\n    },\n    {\n        \"userId\": \"693b0a66f5ab1375c36c6a64\",\n        \"userType\": \"STUDENT\",\n        \"date\": \"2024-10-15\",\n        \"status\": \"LATE\",\n        \"remarks\": \"Bus delayed\"\n    }\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attendance/bulk",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"bulk"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Attendance",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "TEACHER-123",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"ABSENT\",\n    \"remarks\": \"Correction: Student went home early\",\n    \"userId\": \"693b0f1df532103f6a0bcc80\",\n    \"userType\": \"STUDENT\",\n    \"date\": \"2024-10-15\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/attendance/{{attendance_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"{{attendance_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Classroom Views (Teachers)",
+			"item": [
+				{
+					"name": "Get Class Register (Today)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attendance/class/{{class_id}}/section/{{section_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"class",
+								"{{class_id}}",
+								"section",
+								"{{section_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Class Register (Specific Date)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attendance/class/{{class_id}}/section/{{section_id}}?date=2024-10-01",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"class",
+								"{{class_id}}",
+								"section",
+								"{{section_id}}"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "2024-10-01"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Student Views (Calendar)",
+			"item": [
+				{
+					"name": "Get Monthly Range (For Calendar UI)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attendance/student/693b0f1df532103f6a0bcc80/range?startDate=2024-10-01&endDate=2024-10-31",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"student",
+								"693b0f1df532103f6a0bcc80",
+								"range"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-10-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-10-31"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Student History (Paginated)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attendance/student/693b0f1df532103f6a0bcc80?page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"student",
+								"693b0f1df532103f6a0bcc80"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Staff Views (HR)",
+			"item": [
+				{
+					"name": "Get All Staff Attendance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attendance/staff?date=2024-10-15",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"staff"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "2024-10-15"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Dept Attendance (Science)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attendance/staff?department=Science&date=2024-10-15",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"staff"
+							],
+							"query": [
+								{
+									"key": "department",
+									"value": "Science"
+								},
+								{
+									"key": "date",
+									"value": "2024-10-15"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Analytics (Dashboard)",
+			"item": [
+				{
+					"name": "Get Daily Stats (Student)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attendance/stats?userType=STUDENT&date=2024-10-15",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"stats"
+							],
+							"query": [
+								{
+									"key": "userType",
+									"value": "STUDENT"
+								},
+								{
+									"key": "date",
+									"value": "2024-10-15"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Daily Stats (Staff)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/attendance/stats?userType=STAFF&date=2024-10-15",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"attendance",
+								"stats"
+							],
+							"query": [
+								{
+									"key": "userType",
+									"value": "STAFF"
+								},
+								{
+									"key": "date",
+									"value": "2024-10-15"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "attendance_id",
+			"value": "REPLACE_WITH_REAL_ID"
+		},
+		{
+			"key": "class_id",
+			"value": "REPLACE_WITH_CLASS_ID"
+		},
+		{
+			"key": "section_id",
+			"value": "REPLACE_WITH_SECTION_ID"
+		}
+	]
+}

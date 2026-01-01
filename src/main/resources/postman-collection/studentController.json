@@ -1,0 +1,197 @@
+{
+	"info": {
+		"_postman_id": "c1234567-89ab-cdef-0123-456789abcdef",
+		"name": "SMS - Student Module",
+		"description": "Collection for Student Management based on StudentController and DTOs.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Create Student",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-User-Id",
+						"value": "ADMIN-001",
+						"description": "ID of the user creating the record",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"Rohan\",\n    \"middleName\": \"Kumar\",\n    \"lastName\": \"Sharma\",\n    \"dateOfBirth\": \"2015-08-20\",\n    \"gender\": \"MALE\",\n    \"adharNumber\": \"1234-5678-9012\",\n    \"phone\": \"9876543210\",\n    \"email\": \"rohan.sharma@example.com\",\n    \"admissionYear\": 2024,\n    \"admissionNumber\": \"ADM-2024-001\",\n    \"currentClassId\": \"Class-10\",\n    \"currentSection\": \"A\",\n    \"currentAcademicYear\": \"2024-2025\",\n    \"guardians\": [\n        {\n            \"name\": \"Suresh Sharma\",\n            \"relation\": \"FATHER\",\n            \"phone\": \"9988776655\",\n            \"email\": \"suresh@example.com\",\n            \"primary\": true\n        },\n        {\n            \"name\": \"Anita Sharma\",\n            \"relation\": \"MOTHER\",\n            \"phone\": \"9988776644\",\n            \"email\": \"anita@example.com\",\n            \"primary\": false\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/students",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"students"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Get Student by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/students/{{student_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"students",
+						"{{student_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Search Students",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/students?q=Rohan&page=0&size=10",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"students"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "Rohan",
+							"description": "Search query (Name, Admission No, etc.)"
+						},
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4. Update Student",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-User-Id",
+						"value": "ADMIN-001",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"Rohan\",\n    \"middleName\": \"Kumar\",\n    \"lastName\": \"Sharma\",\n    \"dateOfBirth\": \"2015-08-20\",\n    \"gender\": \"MALE\",\n    \"adharNumber\": \"1234-5678-9012\",\n    \"phone\": \"9876543210\",\n    \"email\": \"rohan.updated@example.com\",\n    \"admissionYear\": 2024,\n    \"admissionNumber\": \"ADM-2024-001\",\n    \"currentClassId\": \"Class-10\",\n    \"currentSection\": \"B\",\n    \"currentAcademicYear\": \"2024-2025\",\n    \"guardians\": [\n        {\n            \"name\": \"Suresh Sharma\",\n            \"relation\": \"FATHER\",\n            \"phone\": \"9988776655\",\n            \"email\": \"suresh@example.com\",\n            \"primary\": true\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/students/{{student_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"students",
+						"{{student_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5. Promote Student",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-User-Id",
+						"value": "ADMIN-001",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/students/{{student_id}}/promote?newClassId=Class-11&newSection=A",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"students",
+						"{{student_id}}",
+						"promote"
+					],
+					"query": [
+						{
+							"key": "newClassId",
+							"value": "Class-11"
+						},
+						{
+							"key": "newSection",
+							"value": "A"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6. Delete Student",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/students/{{student_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"students",
+						"{{student_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "student_id",
+			"value": "REPLACE_WITH_ACTUAL_STUDENT_ID",
+			"type": "string"
+		}
+	]
+}
