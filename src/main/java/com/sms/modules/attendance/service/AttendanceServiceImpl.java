@@ -303,6 +303,15 @@ public class AttendanceServiceImpl implements AttendanceService {
 		.map(this::toResponse).toList();
 	return monthlyAttendance;
     }
+    
+    @Override
+    public List<AttendanceResponse> getStaffAttendanceByRange(LocalDate startDate, LocalDate endDate) {
+        return attendanceRepo
+                .findByUserTypeAndDateBetween(UserType.STAFF, startDate, endDate) // Fetch only STAFF
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
 }
 
 @Data

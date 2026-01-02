@@ -5,6 +5,8 @@ import lombok.Data;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.sms.modules.staff.domain.StaffStatus;
+
 @Data
 public class StaffCreateRequest {
 
@@ -22,6 +24,8 @@ public class StaffCreateRequest {
 
     private List<String> subjects;
     private List<String> assignedClassIds;
+    
+    private StaffStatus status;
 
     private String tenantId;
 }

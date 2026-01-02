@@ -34,4 +34,6 @@ public class Staff {
     private List<String> assignedClassIds;
 
     private String tenantId;
+    
+    private StaffStatus status;
 }

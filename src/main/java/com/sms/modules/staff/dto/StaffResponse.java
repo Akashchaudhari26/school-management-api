@@ -6,6 +6,8 @@ import lombok.Data;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.sms.modules.staff.domain.StaffStatus;
+
 @Data
 @Builder
 public class StaffResponse {
@@ -26,6 +28,8 @@ public class StaffResponse {
 
     private List<String> subjects;
     private List<String> assignedClassIds;
+    
+    private StaffStatus status;
 
     private String tenantId;
 }

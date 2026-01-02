@@ -21,6 +21,7 @@ public class StaffMapper {
                 .subjects(req.getSubjects())
                 .assignedClassIds(req.getAssignedClassIds())
                 .tenantId(req.getTenantId())
+                .status(req.getStatus())
                 .build();
     }
 
@@ -40,6 +41,7 @@ public class StaffMapper {
                 .subjects(staff.getSubjects())
                 .assignedClassIds(staff.getAssignedClassIds())
                 .tenantId(staff.getTenantId())
+                .status(staff.getStatus())
                 .build();
     }
 }

@@ -44,4 +44,6 @@ public interface AttendanceService {
 	List<AttendanceResponse> getAttendanceForParent(String studentId) throws AccessDeniedException;
 	
 	List<AttendanceResponse> getClassAttendanceByRange(String classId, String sectionId, LocalDate startDate, LocalDate endDate);
+
+	List<AttendanceResponse> getStaffAttendanceByRange(LocalDate startDate, LocalDate endDate);
 }

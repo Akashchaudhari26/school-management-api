@@ -49,5 +49,8 @@ public interface AttendanceRepository extends MongoRepository<Attendance, String
     List<Attendance> findByClassIdAndSectionIdAndDateBetween(String classId, String sectionId, LocalDate startDate, LocalDate endDate);
     
     List<Attendance> findByDateAfter(LocalDate date);
+    
+    @Query("{ 'userType': ?0, 'date': { $gte: ?1, $lte: ?2 } }")
+    List<Attendance> findByUserTypeAndDateBetween(UserType userType, LocalDate startDate, LocalDate endDate);
   
 }

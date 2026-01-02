@@ -168,4 +168,13 @@ public class AttendanceController {
 
 	return ResponseEntity.ok(svc.getClassAttendanceByRange(classId, sectionId, startDate, endDate));
     }
+    
+    @PreAuthorize("hasAuthority('ATTENDANCE_READ')")
+    @GetMapping("/staff/range")
+    public ResponseEntity<List<AttendanceResponse>> getStaffAttendanceByRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        
+        return ResponseEntity.ok(svc.getStaffAttendanceByRange(startDate, endDate));
+    }
 }
