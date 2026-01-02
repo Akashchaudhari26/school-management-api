@@ -11,5 +11,7 @@ public class RegisterUserRequest {
     private String mobile;
     private String roleName; // ADMIN/TEACHER/...
     private String tenantId;
+    private String userId;
+
     // getters/setters
 }

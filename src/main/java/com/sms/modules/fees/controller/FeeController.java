@@ -24,10 +24,7 @@ public class FeeController {
     private final FeeService feeService;
 
     // ================= CREATE FEE =================
-    @PostMapping(
-        consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyAuthority('FEE_MANAGE_ALL', 'FEE_CREATE')")
     public ResponseEntity<FeeResponse> createFee(
             @RequestBody FeeCreateRequest request) {
@@ -37,59 +34,43 @@ public class FeeController {
     }
 
     // ================= PAY FEE =================
-    @PostMapping(
-        value = "/student/{studentId}/{academicYear}/pay",
-        consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @PostMapping(value = "/student/{studentId}/{academicYear}/pay", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyAuthority('FEE_MANAGE_ALL', 'FEE_CREATE')")
     public ResponseEntity<FeeResponse> payFeeByStudent(
             @PathVariable String studentId,
             @PathVariable String academicYear,
             @RequestBody FeePaymentRequest request) {
 
-        FeeResponse response =
-                feeService.payFeeByStudent(studentId, academicYear, request);
+        FeeResponse response = feeService.payFeeByStudent(studentId, academicYear, request);
 
         return ResponseEntity.ok(response);
     }
 
     // ================= GET FEE SUMMARY =================
-    @GetMapping(
-        value = "/student/{studentId}/{academicYear}",
-        produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @GetMapping(value = "/student/{studentId}/{academicYear}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyAuthority('FEE_MANAGE_ALL', 'FEE_READ')")
     public ResponseEntity<FeeResponse> getFee(
             @PathVariable String studentId,
             @PathVariable String academicYear) {
 
-        FeeResponse response =
-                feeService.getFeeByStudent(studentId, academicYear);
+        FeeResponse response = feeService.getFeeByStudent(studentId, academicYear);
 
         return ResponseEntity.ok(response);
     }
 
     // ================= DUES DASHBOARD =================
-    @GetMapping(
-        value = "/dues",
-        produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @GetMapping(value = "/dues", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyAuthority('FEE_MANAGE_ALL', 'FEE_READ')")
     public ResponseEntity<List<FeeDueResponse>> getPendingDues(
             @RequestParam String academicYear) {
 
-        List<FeeDueResponse> dues =
-                feeService.getPendingDues(academicYear);
+        List<FeeDueResponse> dues = feeService.getPendingDues(academicYear);
 
         return ResponseEntity.ok(dues);
     }
 
     // ================= RECEIPT DOWNLOAD =================
-    @GetMapping(
-        value = "/receipt/{receiptNo}",
-        produces = MediaType.APPLICATION_PDF_VALUE
-    )
+    @GetMapping(value = "/receipt/{receiptNo}", produces = MediaType.APPLICATION_PDF_VALUE)
     @PreAuthorize("hasAnyAuthority('FEE_MANAGE_ALL', 'FEE_READ')")
     public ResponseEntity<byte[]> downloadReceipt(
             @PathVariable String receiptNo) {
@@ -98,25 +79,20 @@ public class FeeController {
 
         return ResponseEntity.ok()
                 .header(
-                    "Content-Disposition",
-                    "attachment; filename=" + receiptNo + ".pdf"
-                )
+                        "Content-Disposition",
+                        "attachment; filename=" + receiptNo + ".pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
 
     // ================= PAYMENT HISTORY =================
-    @GetMapping(
-        value = "/student/{studentId}/{academicYear}/payments",
-        produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @GetMapping(value = "/student/{studentId}/{academicYear}/payments", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyAuthority('FEE_MANAGE_ALL', 'FEE_READ')")
     public ResponseEntity<List<FeePaymentHistoryResponse>> getPaymentHistory(
             @PathVariable String studentId,
             @PathVariable String academicYear) {
 
-        List<FeePaymentHistoryResponse> history =
-                feeService.getPaymentHistory(studentId, academicYear);
+        List<FeePaymentHistoryResponse> history = feeService.getPaymentHistory(studentId, academicYear);
 
         return ResponseEntity.ok(history);
     }

@@ -6,7 +6,6 @@ import com.sms.modules.staff.dto.StaffSearchFilter;
 import com.sms.modules.staff.service.StaffServiceImpl;
 import com.sms.security.SecurityUtils;
 
-import org.apache.catalina.security.SecurityUtil;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,18 +52,16 @@ public class StaffController {
 	public void delete(@PathVariable String id) {
 		svc.delete(id);
 	}
-	
+
 	@PreAuthorize("hasAuthority('STAFF_READ')")
 	@PostMapping("/search")
 	public ResponseEntity<Page<StaffResponse>> search(@RequestBody StaffSearchFilter filter) {
-	    Pageable pageable = PageRequest.of(
-	            filter.getPage(),
-	            filter.getSize(),
-	            Sort.by(filter.getDirection(), filter.getSortBy())
-	    );
+		Pageable pageable = PageRequest.of(
+				filter.getPage(),
+				filter.getSize(),
+				Sort.by(filter.getDirection(), filter.getSortBy()));
 
-	    
-	    // You need to implement this method in your Service
-	    return ResponseEntity.ok(svc.searchStaff(filter, pageable));
+		// You need to implement this method in your Service
+		return ResponseEntity.ok(svc.searchStaff(filter, pageable));
 	}
 }

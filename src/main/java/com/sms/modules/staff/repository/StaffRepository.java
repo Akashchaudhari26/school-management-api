@@ -12,4 +12,6 @@ public interface StaffRepository extends MongoRepository<Staff, String> {
     List<Staff> findByStaffType(String staffType);
 
     List<Staff> findByTenantId(String tenantId);
+
+    Staff findTopByEmployeeCodeStartingWithOrderByEmployeeCodeDesc(String prefix);
 }

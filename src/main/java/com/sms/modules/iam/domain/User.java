@@ -8,16 +8,11 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -32,11 +27,15 @@ public class User {
 
     @Indexed(unique = true)
     @NotBlank(message = "Aadhaar number is required")
-    // Regex: Exactly 12 digits. 
-    // Option: Use "^[2-9]\\d{11}$" if you want to strictly block numbers starting with 0 or 1.
+    // Regex: Exactly 12 digits.
+    // Option: Use "^[2-9]\\d{11}$" if you want to strictly block numbers starting
+    // with 0 or 1.
     @Pattern(regexp = "^\\d{12}$", message = "Aadhaar number must be exactly 12 digits")
     private String adharNumber;
-    
+
+    @Indexed(unique = true, sparse = true)
+    private String userId;
+
     private String fullName;
 
     @Indexed(unique = true)
@@ -60,7 +59,7 @@ public class User {
     private List<String> permissions; // extra perms
 
     private String classId; // if student
-    
+
     private String departmentId; // if teacher
 
     private String tenantId; // future multi-school

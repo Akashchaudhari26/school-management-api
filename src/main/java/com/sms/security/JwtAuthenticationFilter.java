@@ -9,7 +9,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
@@ -20,7 +19,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-import java.util.Collections;
 import java.util.Optional;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -35,49 +33,45 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
         try {
             String jwt = getJwtFromRequest(request);
 
             // 1. Check if token exists
-            if (StringUtils.hasText(jwt)) {
-                
-                // 2. This method MUST throw ExpiredJwtException if expired.
-                // If it returns 'false' silently, the catch block won't trigger.
-                if (tokenProvider.validateToken(jwt)) {
-                    
-                    String userId = tokenProvider.getUserIdFromJWT(jwt);
-                    Optional<User> ou = userRepository.findById(userId);
+            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
 
-                    if (ou.isPresent()) {
-                        User user = ou.get();
-                        var authorities = user.getPermissions().stream()
-                                .map(SimpleGrantedAuthority::new)
-                                .toList();
+                String userId = tokenProvider.getUserIdFromJWT(jwt);
+                Optional<User> ou = userRepository.findById(userId);
 
-                        UsernamePasswordAuthenticationToken authentication = 
-                                new UsernamePasswordAuthenticationToken(user, null, authorities);
-                        
-                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                    }
+                if (ou.isPresent()) {
+                    User user = ou.get();
+                    var authorities = user.getPermissions().stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .toList();
+
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            user, null, authorities);
+
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
+
         } catch (ExpiredJwtException ex) {
             // 🔥 This is exactly what fixes your issue
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
             response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"Token Expired\", \"message\": \"The JWT token has expired.\"}");
             return; // ⛔ STOP execution. Do not proceed to filterChain.
-            
+
         } catch (MalformedJwtException | SignatureException ex) {
             // Optional: Handle other token errors explicitly as 401 too
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"Invalid Token\", \"message\": \"The JWT token is invalid.\"}");
             return;
-            
+
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);
         }
