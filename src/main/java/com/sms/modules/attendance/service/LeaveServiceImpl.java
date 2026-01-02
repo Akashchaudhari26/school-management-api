@@ -3,7 +3,6 @@ package com.sms.modules.attendance.service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -92,21 +91,13 @@ public class LeaveServiceImpl {
         LocalDate end = leave.getEndDate();
 
         while (!current.isAfter(end)) {
-            // Check if attendance already exists
-            // We use your existing Repository method structure
-            // Assuming we are treating LEAVE as 'ABSENT' for the register
-
             Attendance att = new Attendance();
             att.setUserId(leave.getUserId());
             att.setUserType(UserType.valueOf(leave.getUserType())); // STAFF
             att.setDate(current);
             att.setStatus(AttendanceStatus.ABSENT);
-            att.setRemarks("On Leave: " + leave.getLeaveType()); // e.g. "On Leave: SICK"
-
-            // Save or Update logic (You might need a specialized method in repo to upsert)
-            // For simplicity:
+            att.setRemarks("On Leave: " + leave.getLeaveType() + " - " + leave.getReason()); // e.g. "On Leave: SICK"
             attendanceRepo.save(att);
-
             current = current.plusDays(1);
         }
     }
