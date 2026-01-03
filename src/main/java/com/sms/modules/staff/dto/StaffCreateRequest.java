@@ -15,7 +15,7 @@ public class StaffCreateRequest {
     private String mobile;
     private String gender;
     private LocalDate dateOfBirth;
-    private String aadhaar;
+    private String adhaar;
 
     private String staffType; // TEACHER / NON_TEACHING
     private String designation;
@@ -24,7 +24,7 @@ public class StaffCreateRequest {
 
     private List<String> subjects;
     private List<String> assignedClassIds;
-    
+
     private StaffStatus status;
 
     private String tenantId;

@@ -19,7 +19,7 @@ public class StaffResponse {
     private String mobile;
     private String gender;
     private LocalDate dateOfBirth;
-    private String aadhaar;
+    private String adhaar;
 
     private String staffType;
     private String designation;
@@ -28,7 +28,7 @@ public class StaffResponse {
 
     private List<String> subjects;
     private List<String> assignedClassIds;
-    
+
     private StaffStatus status;
 
     private String tenantId;

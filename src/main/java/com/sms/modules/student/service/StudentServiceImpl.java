@@ -9,6 +9,11 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import com.sms.modules.iam.domain.User;
+import com.sms.modules.iam.dto.RegisterUserRequest;
+import com.sms.modules.iam.repository.UserRepository;
+import com.sms.modules.iam.service.AuthService;
+import com.sms.modules.student.domain.GuardianRef;
 import com.sms.modules.student.domain.Student;
 import com.sms.modules.student.dto.StudentCreateRequest;
 import com.sms.modules.student.dto.StudentResponse;
@@ -18,6 +23,7 @@ import com.sms.modules.student.repository.StudentRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -27,6 +33,12 @@ public class StudentServiceImpl implements StudentService {
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
+
+	@Autowired
+	private AuthService authService;
+
+	@Autowired
+	private UserRepository userRepository;
 
 	@Autowired
 	public StudentServiceImpl(StudentRepository repo) {
@@ -47,6 +59,13 @@ public class StudentServiceImpl implements StudentService {
 		s.setCreatedBy(createdBy);
 		s.setUpdatedBy(createdBy);
 		Student saved = studentRepository.save(s);
+		if (saved.getGuardians() != null) {
+			for (GuardianRef guardian : saved.getGuardians()) {
+				if (guardian.getAdharNumber() != null && !guardian.getAdharNumber().isBlank()) {
+					createOrLinkParentUser(guardian);
+				}
+			}
+		}
 		return StudentMapper.toDto(saved);
 	}
 
@@ -191,5 +210,33 @@ public class StudentServiceImpl implements StudentService {
 	@Override
 	public List<StudentResponse> getMyChildren(String parentUserId) {
 		return studentRepository.findByGuardiansIamUserId(parentUserId).stream().map(StudentMapper::toDto).toList();
+	}
+
+	private void createOrLinkParentUser(GuardianRef guardian) {
+		try {
+			User user;
+
+			// Step A: Check if User already exists (e.g., Sibling's parent)
+			Optional<User> existingUser = userRepository.findByAdharNumber(guardian.getAdharNumber());
+
+			if (existingUser.isPresent()) {
+				user = existingUser.get();
+			} else {
+				// Step B: Create New User if not exists
+				RegisterUserRequest req = RegisterUserRequest.mapGuardianToUserRequest(guardian);
+				user = authService.register(req);
+			}
+
+			// Step C: Link the Student's Guardian entry to this User ID
+			// (This uses your custom @Update query to set iamUserId)
+			studentRepository.linkGuardianToIamUser(guardian.getAdharNumber(), user.getId());
+
+		} catch (Exception e) {
+			// Log error but don't fail student creation?
+			// Or throw exception to rollback?
+			// Usually better to log for parents so student data isn't lost.
+			System.err.println("Failed to create user for guardian: " + guardian.getName() + " - " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 }

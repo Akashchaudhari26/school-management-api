@@ -1,6 +1,7 @@
 package com.sms.modules.iam.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.sms.modules.iam.domain.User;
@@ -15,6 +16,9 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public List<User> listAll() {
         return userRepository.findAll();
@@ -35,6 +39,10 @@ public class UserService {
         ex.setMobile(updated.getMobile());
         ex.setProfileImageUrl(updated.getProfileImageUrl());
         ex.setUpdatedAt(Instant.now());
+        ex.setEmail(updated.getEmail());
+        if (updated.getPassword() != null && !updated.getPassword().isBlank()) {
+            ex.setPassword(passwordEncoder.encode(updated.getPassword()));
+        }
         return userRepository.save(ex);
     }
 

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("api/users")
 public class UserController {
 
     @Autowired
@@ -25,7 +25,8 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<?> list() {
-        List<UserResponse> list = userService.listAll().stream().map(UserMapper::toResponse).collect(Collectors.toList());
+        List<UserResponse> list = userService.listAll().stream().map(UserMapper::toResponse)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }
 
@@ -56,9 +57,10 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable String id) {
         userService.delete(id);
-        return ResponseEntity.ok("Deleted");
+        // ✅ Return JSON: { "message": "Deleted" }
+        return ResponseEntity.ok(java.util.Collections.singletonMap("message", "Deleted"));
     }
-    
+
     public static void main(String[] args) {
         byte[] key = Keys.secretKeyFor(SignatureAlgorithm.HS512).getEncoded();
         System.out.println(Base64.getEncoder().encodeToString(key));

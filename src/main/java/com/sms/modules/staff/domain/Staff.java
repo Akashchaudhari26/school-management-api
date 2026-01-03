@@ -23,7 +23,9 @@ public class Staff {
     private String mobile;
     private String gender;
     private LocalDate dateOfBirth;
-    private String aadhaar;
+
+    @Indexed(unique = true)
+    private String adhaar;
 
     private String staffType; // TEACHER | NON_TEACHING
     private String designation;

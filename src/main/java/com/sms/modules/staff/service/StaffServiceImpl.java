@@ -1,5 +1,8 @@
 package com.sms.modules.staff.service;
 
+import com.sms.modules.iam.dto.RegisterUserRequest;
+import com.sms.modules.iam.repository.RoleRepository;
+import com.sms.modules.iam.service.AuthService;
 import com.sms.modules.staff.domain.Staff;
 import com.sms.modules.staff.dto.StaffCreateRequest;
 import com.sms.modules.staff.dto.StaffResponse;
@@ -28,12 +31,22 @@ public class StaffServiceImpl {
 	@Autowired
 	private MongoTemplate mongoTemplate;
 
+	@Autowired
+	private AuthService authService;
+
+	@Autowired
+	private RoleRepository roleRepository;
+
 	public StaffResponse createStaff(StaffCreateRequest req, String userId) {
 		Staff staff = StaffMapper.toEntity(req);
 		String newCode = generateEmployeeCode(staff.getStaffType());
 		staff.setEmployeeCode(newCode);
 
-		repo.save(staff);
+		Staff savedStaff = repo.save(staff);
+		if (savedStaff != null && roleRepository.findByName(savedStaff.getDesignation()).isPresent()) {
+			RegisterUserRequest registerRequest = RegisterUserRequest.mapStaffToUserRequest(savedStaff);
+			authService.register(registerRequest);
+		}
 		return StaffMapper.toDto(staff);
 	}
 
@@ -75,7 +88,7 @@ public class StaffServiceImpl {
 			String keyword = filter.getKeyword().trim();
 			criteriaList.add(new Criteria().orOperator(Criteria.where("fullName").regex(keyword, "i"),
 					Criteria.where("email").regex(keyword, "i"), Criteria.where("mobile").regex(keyword, "i"),
-					Criteria.where("aadhaar").regex(keyword, "i"), Criteria.where("employeeCode").regex(keyword, "i")));
+					Criteria.where("adhaar").regex(keyword, "i"), Criteria.where("employeeCode").regex(keyword, "i")));
 		}
 
 		if (filter.getStaffType() != null) {

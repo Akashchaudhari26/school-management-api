@@ -1,6 +1,7 @@
 package com.sms.modules.iam.service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +88,7 @@ public class AuthService {
 	}
 
 	public User register(RegisterUserRequest req) {
+		// 1. Validations
 		if (userRepository.existsByEmail(req.getEmail())) {
 			throw new RuntimeException("Email already exists");
 		}
@@ -96,23 +98,45 @@ public class AuthService {
 		if (userRepository.existsByAdharNumber(req.getAdharNumber())) {
 			throw new RuntimeException("Adhar Number already exists");
 		}
+
+		// 2. Fetch Role
 		Role role = roleRepository.findByName(req.getRoleName())
 				.orElseThrow(() -> new RuntimeException("Role not found: " + req.getRoleName()));
 
 		User u = new User();
+
+		// --- Basic Fields ---
 		u.setFullName(req.getFullName());
 		u.setEmail(req.getEmail().toLowerCase());
 		u.setPassword(passwordEncoder.encode(req.getPassword()));
 		u.setMobile(req.getMobile());
-		u.setStatus("ACTIVE");
-		u.setRoleName(role.getName());
-		u.setPermissions(role.getPermissions());
-		u.setTenantId(req.getTenantId() != null ? req.getTenantId() : "default");
-		u.setCreatedAt(Instant.now());
 		u.setAdharNumber(req.getAdharNumber());
 		u.setUserId(req.getUserId());
+		u.setTenantId(req.getTenantId() != null ? req.getTenantId() : "default");
+		u.setCreatedAt(Instant.now());
+
+		u.setStatus(req.getStatus() != null ? req.getStatus() : "ACTIVE");
+		u.setProfileImageUrl(req.getProfileImageUrl());
+		u.setClassId(req.getClassId());
+		u.setDepartmentId(req.getDepartmentId());
+
+		List<String> combinedPermissions = new ArrayList<>();
+
+		if (role.getPermissions() != null) {
+			combinedPermissions.addAll(role.getPermissions());
+		}
+
+		if (req.getPermissions() != null) {
+			combinedPermissions.addAll(req.getPermissions());
+		}
+
+		u.setPermissions(combinedPermissions.stream().distinct().toList());
+
+		u.setRoleName(role.getName());
+
 		userRepository.save(u);
-		studentRepository.linkGuardianToIamUser(u.getAdharNumber(), u.getId());
+		// studentRepository.linkGuardianToIamUser(u.getAdharNumber(), u.getId());
+
 		return u;
 	}
 }
