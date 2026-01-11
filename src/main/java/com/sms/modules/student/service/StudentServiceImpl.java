@@ -1,5 +1,6 @@
 package com.sms.modules.student.service;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -9,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import com.sms.modules.fees.service.FeeService;
 import com.sms.modules.iam.domain.User;
 import com.sms.modules.iam.dto.RegisterUserRequest;
 import com.sms.modules.iam.repository.UserRepository;
@@ -41,6 +43,9 @@ public class StudentServiceImpl implements StudentService {
 	private UserRepository userRepository;
 
 	@Autowired
+	FeeService feeService;
+
+	@Autowired
 	public StudentServiceImpl(StudentRepository repo) {
 		this.studentRepository = repo;
 	}
@@ -59,6 +64,12 @@ public class StudentServiceImpl implements StudentService {
 		s.setCreatedBy(createdBy);
 		s.setUpdatedBy(createdBy);
 		Student saved = studentRepository.save(s);
+		try {
+			feeService.assignDefaultFeeStructure(saved); // You can pass this dynamic
+		} catch (Exception e) {
+			// Log error but don't stop admission
+			System.err.println("Failed to auto-assign fees: " + e.getMessage());
+		}
 		if (saved.getGuardians() != null) {
 			for (GuardianRef guardian : saved.getGuardians()) {
 				if (guardian.getAdharNumber() != null && !guardian.getAdharNumber().isBlank()) {
@@ -91,10 +102,21 @@ public class StudentServiceImpl implements StudentService {
 
 		// 🔍 Keyword search (name, admission number)
 		if (filter.getKeyword() != null && !filter.getKeyword().isBlank()) {
+
 			String keyword = filter.getKeyword().trim();
-			criteriaList.add(new Criteria().orOperator(Criteria.where("firstName").regex(keyword, "i"),
-					Criteria.where("lastName").regex(keyword, "i"),
-					Criteria.where("admissionNumber").regex(keyword, "i")));
+			List<Criteria> orCriteria = new ArrayList<>();
+
+			// Text search
+			orCriteria.add(Criteria.where("firstName").regex(keyword, "i"));
+			orCriteria.add(Criteria.where("lastName").regex(keyword, "i"));
+			orCriteria.add(Criteria.where("admissionNumber").regex(keyword, "i"));
+
+			// ID search (only if valid ObjectId)
+			if (ObjectId.isValid(keyword)) {
+				orCriteria.add(Criteria.where("_id").is(new ObjectId(keyword)));
+			}
+
+			criteriaList.add(new Criteria().orOperator(orCriteria.toArray(new Criteria[0])));
 		}
 
 		if (filter.getClassId() != null) {

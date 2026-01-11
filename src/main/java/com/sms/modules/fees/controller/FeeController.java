@@ -9,8 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.sms.modules.fees.dto.BulkFeeCreateRequest;
+import com.sms.modules.fees.dto.BulkFeeResponse;
 import com.sms.modules.fees.dto.FeeCreateRequest;
-import com.sms.modules.fees.dto.FeeDueResponse;
 import com.sms.modules.fees.dto.FeePaymentHistoryResponse;
 import com.sms.modules.fees.dto.FeePaymentRequest;
 import com.sms.modules.fees.dto.FeeResponse;
@@ -61,10 +62,10 @@ public class FeeController {
     // ================= DUES DASHBOARD =================
     @GetMapping(value = "/dues", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyAuthority('FEE_MANAGE_ALL', 'FEE_READ')")
-    public ResponseEntity<List<FeeDueResponse>> getPendingDues(
+    public ResponseEntity<List<FeeResponse>> getPendingDues(
             @RequestParam String academicYear) {
 
-        List<FeeDueResponse> dues = feeService.getPendingDues(academicYear);
+        List<FeeResponse> dues = feeService.getPendingDues(academicYear);
 
         return ResponseEntity.ok(dues);
     }
@@ -95,5 +96,14 @@ public class FeeController {
         List<FeePaymentHistoryResponse> history = feeService.getPaymentHistory(studentId, academicYear);
 
         return ResponseEntity.ok(history);
+    }
+
+    @PostMapping("/bulk-create")
+    @PreAuthorize("hasAnyAuthority('FEE_MANAGE_ALL', 'FEE_CREATE')")
+    public ResponseEntity<BulkFeeResponse> createBulkFees(@RequestBody BulkFeeCreateRequest request) {
+
+        BulkFeeResponse response = feeService.createBulkFees(request);
+
+        return ResponseEntity.ok(response);
     }
 }

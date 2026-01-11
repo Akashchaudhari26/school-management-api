@@ -2,6 +2,7 @@ package com.sms.modules.fees.domain;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
@@ -11,6 +12,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@CompoundIndex(name = "student_academic_year_idx", def = "{'studentId': 1, 'academicYear': 1}", unique = true)
 @Document(collection = "fees")
 public class Fee {
 
