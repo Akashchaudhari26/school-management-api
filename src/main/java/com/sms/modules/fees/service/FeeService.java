@@ -27,4 +27,6 @@ public interface FeeService {
 	BulkFeeResponse createBulkFees(BulkFeeCreateRequest request);
 
 	void assignDefaultFeeStructure(Student student);
+
+	FeeResponse updatePayment(String receiptNo, FeePaymentRequest updateRequest);
 }

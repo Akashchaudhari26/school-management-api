@@ -20,4 +20,5 @@ public interface FeeRepository extends MongoRepository<Fee, String> {
 	boolean existsByStudentIdAndAcademicYear(String studentId, String academicYear);
 
 	List<Fee> findByAcademicYearAndStudentIdIn(String academicYear, List<String> studentIds);
+
 }

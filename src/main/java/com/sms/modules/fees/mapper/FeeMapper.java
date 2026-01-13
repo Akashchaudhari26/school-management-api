@@ -21,13 +21,11 @@ public class FeeMapper {
 		return FeeResponse.builder()
 				.id(fee.getId())
 				.studentId(fee.getStudentId())
-				// --- Map Student Details Here ---
 				.studentName(student.getFirstName() + " " + student.getLastName())
 				.guardian(student.getGuardians()) // Ensure types match (List<GuardianRef>)
 				.academicYear(fee.getAcademicYear()) // Use Fee's academic year usually
 				.currentClassId(student.getCurrentClassId())
 				.currentSection(student.getCurrentSection())
-				// --- Map Fee Details ---
 				.feeItems(fee.getFeeItems())
 				.payments(fee.getPayments())
 				.totalAmount(fee.getTotalAmount())

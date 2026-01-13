@@ -108,7 +108,10 @@ public class FeeServiceImpl implements FeeService {
 				.receiptNo(ReceiptNumberGenerator.generate())
 				.amountPaid(request.getAmount())
 				.mode(request.getMode())
-				.collectedBy(SecurityUtils.getCurrentUserId())
+				.collectedBy(
+						request.getCollectedBy() != null
+								? request.getCollectedBy()
+								: SecurityUtils.getCurrentUser().getFullName())
 				.paidAt(LocalDateTime.now())
 				.build();
 
@@ -336,6 +339,41 @@ public class FeeServiceImpl implements FeeService {
 		// 3. Save
 		feeRepository.save(fee);
 		System.out.println("Auto-assigned fees for student: " + student.getId());
+	}
+
+	@Override
+	public FeeResponse updatePayment(String receiptNo, FeePaymentRequest updateRequest) {
+		Fee fee = feeRepository.findByPaymentsReceiptNo(receiptNo)
+				.orElseThrow(() -> new RuntimeException("Receipt number not found: " + receiptNo));
+
+		Student student = studentRepository.findById(
+				fee.getStudentId())
+				.orElseThrow(() -> new StudentNotFoundException(fee.getStudentId()));
+
+		FeePayment targetPayment = fee.getPayments().stream()
+				.filter(p -> p.getReceiptNo().equals(receiptNo))
+				.findFirst()
+				.orElseThrow(() -> new RuntimeException("Payment data corruption: Receipt missing in list"));
+
+		BigDecimal oldAmount = targetPayment.getAmountPaid();
+		BigDecimal newAmount = updateRequest.getAmount();
+		BigDecimal diff = newAmount.subtract(oldAmount);
+
+		targetPayment.setAmountPaid(newAmount);
+		targetPayment.setMode(updateRequest.getMode());
+		targetPayment.setCollectedBy(updateRequest.getCollectedBy());
+		fee.setPaidAmount(fee.getPaidAmount().add(diff));
+		fee.setDueAmount(fee.getDueAmount().subtract(diff));
+
+		if (fee.getDueAmount().compareTo(BigDecimal.ZERO) <= 0) {
+			fee.setStatus(FeeStatus.PAID);
+		} else if (fee.getPaidAmount().compareTo(BigDecimal.ZERO) > 0) {
+			fee.setStatus(FeeStatus.PARTIALLY_PAID);
+		} else {
+			fee.setStatus(FeeStatus.PENDING);
+		}
+		Fee savedFee = feeRepository.save(fee);
+		return FeeMapper.toResponse(savedFee, student);
 	}
 
 }

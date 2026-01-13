@@ -47,6 +47,16 @@ public class FeeController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/payment/update/{receiptNo}")
+    @PreAuthorize("hasAnyAuthority('FEE_MANAGE_ALL', 'FEE_CREATE')")
+    public ResponseEntity<FeeResponse> updatePayment(
+            @PathVariable String receiptNo,
+            @RequestBody FeePaymentRequest updateRequest) {
+
+        FeeResponse response = feeService.updatePayment(receiptNo, updateRequest);
+        return ResponseEntity.ok(response);
+    }
+
     // ================= GET FEE SUMMARY =================
     @GetMapping(value = "/student/{studentId}/{academicYear}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyAuthority('FEE_MANAGE_ALL', 'FEE_READ')")
