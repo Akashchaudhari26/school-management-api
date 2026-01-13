@@ -1,6 +1,5 @@
 package com.sms.modules.student.mapper;
 
-
 import java.time.Instant;
 
 import com.sms.modules.student.domain.Student;
@@ -35,6 +34,7 @@ public class StudentMapper {
         StudentResponse r = new StudentResponse();
         r.setId(s.getId());
         r.setFirstName(s.getFirstName());
+        r.setMiddleName(s.getMiddleName());
         r.setLastName(s.getLastName());
         r.setDateOfBirth(s.getDateOfBirth());
         r.setGender(s.getGender());

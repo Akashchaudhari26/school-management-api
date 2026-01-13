@@ -1,6 +1,5 @@
 package com.sms.modules.student.dto;
 
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -14,6 +13,7 @@ import lombok.Data;
 public class StudentResponse {
     private String id;
     private String firstName;
+    private String middleName;
     private String lastName;
     private LocalDate dateOfBirth;
     private Gender gender;
@@ -22,7 +22,7 @@ public class StudentResponse {
     private StudentStatus status;
     private String currentClassId;
     private String currentSection;
-	private String currentAcademicYear;
+    private String currentAcademicYear;
 
     private List<GuardianRef> guardians;
     // getters/setters

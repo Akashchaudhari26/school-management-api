@@ -2,6 +2,9 @@ package com.sms.modules.student.service;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +34,8 @@ import java.util.UUID;
 @Service
 public class StudentServiceImpl implements StudentService {
 
-	private final StudentRepository studentRepository;
+	@Autowired
+	private StudentRepository studentRepository;
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
@@ -44,11 +48,6 @@ public class StudentServiceImpl implements StudentService {
 
 	@Autowired
 	FeeService feeService;
-
-	@Autowired
-	public StudentServiceImpl(StudentRepository repo) {
-		this.studentRepository = repo;
-	}
 
 	@Override
 	public StudentResponse createStudent(StudentCreateRequest request, String createdBy) {
@@ -87,6 +86,7 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
+	@Cacheable(value = "students", key = "#id")
 	public StudentResponse getStudent(String id) {
 		Student s = studentRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
 		return StudentMapper.toDto(s);
@@ -158,6 +158,7 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
+	@CachePut(value = "students", key = "#id")
 	public StudentResponse updateStudent(String id, StudentCreateRequest request, String updatedBy) {
 		Student s = studentRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
 		// update fields
@@ -208,18 +209,18 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
+	@CacheEvict(value = "students", key = "#id")
 	public void deleteStudent(String id) {
 		studentRepository.deleteById(id);
 	}
 
 	@Override
 	public StudentResponse admitStudent(String applicationId, String createdBy) {
-		// If you maintain a separate Application collection, take applicationId,
-		// convert to Student
 		throw new UnsupportedOperationException("Not implemented");
 	}
 
 	@Override
+	@CachePut(value = "students", key = "#studentId")
 	public StudentResponse promoteStudent(String studentId, String newClassId, String newSection, String promotedBy) {
 		Student s = studentRepository.findById(studentId).orElseThrow(() -> new RuntimeException("Student not found"));
 		s.setCurrentClassId(newClassId);
