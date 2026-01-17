@@ -27,5 +27,5 @@ public class SchoolClass {
 
     private List<Section> sections = new ArrayList<>();
 
-    private List<String> subjectIds = new ArrayList<>();
+    private List<String> subjectNames = new ArrayList<>();
 }

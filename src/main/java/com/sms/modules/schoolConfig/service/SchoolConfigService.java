@@ -65,22 +65,22 @@ public class SchoolConfigService {
     }
 
     @CacheEvict(value = "classes_list", allEntries = true)
-    public SchoolClass assignSubjectToClass(String classId, String subjectId) {
+    public SchoolClass assignSubjectToClass(String classId, String subjectName) {
         SchoolClass schoolClass = classRepository.findById(classId)
                 .orElseThrow(() -> new RuntimeException("Class not found"));
 
         // Verify subject exists first
-        if (!subjectRepository.existsById(subjectId)) {
-            throw new RuntimeException("Subject ID not found: " + subjectId);
+        if (!subjectRepository.existsById(subjectName)) {
+            throw new RuntimeException("Subject ID not found: " + subjectName);
         }
 
-        if (schoolClass.getSubjectIds() == null) {
-            schoolClass.setSubjectIds(new java.util.ArrayList<>());
+        if (schoolClass.getSubjectNames() == null) {
+            schoolClass.setSubjectNames(new java.util.ArrayList<>());
         }
 
         // Avoid duplicates
-        if (!schoolClass.getSubjectIds().contains(subjectId)) {
-            schoolClass.getSubjectIds().add(subjectId);
+        if (!schoolClass.getSubjectNames().contains(subjectName)) {
+            schoolClass.getSubjectNames().add(subjectName);
         }
 
         return classRepository.save(schoolClass);

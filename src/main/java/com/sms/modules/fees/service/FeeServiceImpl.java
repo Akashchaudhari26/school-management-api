@@ -315,8 +315,16 @@ public class FeeServiceImpl implements FeeService {
 				student.getCurrentAcademicYear());
 
 		if (masterOpt.isEmpty()) {
-			System.out.println(
-					"No Master Fee Structure found for " + student.getCurrentClassId() + ". Skipping auto-assignment.");
+			masterOpt = feeMasterRepository
+					.findTopByClassIdOrderByAcademicYearDesc(student.getCurrentClassId());
+
+			if (masterOpt.isPresent()) {
+				System.out.println("No exact fee found for " + student.getCurrentAcademicYear() +
+						". Using fallback structure from " + masterOpt.get().getAcademicYear());
+			}
+		}
+		if (masterOpt.isEmpty()) {
+			System.err.println("No Fee Structure found for class: " + student.getCurrentClassId());
 			return;
 		}
 

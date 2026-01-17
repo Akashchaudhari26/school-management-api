@@ -1,5 +1,6 @@
 package com.sms.modules.student.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.sms.modules.iam.domain.User;
+import com.sms.modules.student.dto.PromotionRequest;
 import com.sms.modules.student.dto.StudentCreateRequest;
 import com.sms.modules.student.dto.StudentResponse;
 import com.sms.modules.student.dto.StudentSearchFilter;
@@ -71,6 +73,12 @@ public class StudentController {
     public ResponseEntity<StudentResponse> promote(@PathVariable String id, @RequestParam String newClassId,
             @RequestParam(required = false) String newSection, @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(studentService.promoteStudent(id, newClassId, newSection, user.getId()));
+    }
+
+    @PostMapping("/promote")
+    public ResponseEntity<?> promoteStudents(@RequestBody PromotionRequest request) {
+        studentService.promoteStudents(request);
+        return ResponseEntity.ok(Collections.singletonMap("message", "Students promoted successfully!"));
     }
 
     @PreAuthorize("hasAuthority('STUDENT_READ_SELF_CHILD')")

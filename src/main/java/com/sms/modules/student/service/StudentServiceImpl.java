@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sms.modules.fees.service.FeeService;
 import com.sms.modules.iam.domain.User;
@@ -20,16 +21,22 @@ import com.sms.modules.iam.repository.UserRepository;
 import com.sms.modules.iam.service.AuthService;
 import com.sms.modules.student.domain.GuardianRef;
 import com.sms.modules.student.domain.Student;
+import com.sms.modules.student.domain.StudentAcademicHistory;
+import com.sms.modules.student.dto.PromotionRequest;
 import com.sms.modules.student.dto.StudentCreateRequest;
+import com.sms.modules.student.dto.StudentPromotionDetail;
 import com.sms.modules.student.dto.StudentResponse;
 import com.sms.modules.student.dto.StudentSearchFilter;
 import com.sms.modules.student.mapper.StudentMapper;
+import com.sms.modules.student.repository.StudentAcademicHistoryRepository;
 import com.sms.modules.student.repository.StudentRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -45,6 +52,9 @@ public class StudentServiceImpl implements StudentService {
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private StudentAcademicHistoryRepository studentAcademicHistoryRepository;
 
 	@Autowired
 	FeeService feeService;
@@ -228,6 +238,80 @@ public class StudentServiceImpl implements StudentService {
 		s.setUpdatedBy(promotedBy);
 		s.setUpdatedAt(java.time.Instant.now().toEpochMilli());
 		return StudentMapper.toDto(studentRepository.save(s));
+	}
+
+	@Override
+	@Transactional
+	public void promoteStudents(PromotionRequest request) {
+		// 1. Fetch all students in one query (Performance Optimization)
+		List<String> studentIds = request.getStudents().stream()
+				.map(StudentPromotionDetail::getStudentId)
+				.collect(Collectors.toList());
+
+		List<Student> students = studentRepository.findAllById(studentIds);
+
+		// Map for quick lookup
+		Map<String, Student> studentMap = students.stream()
+				.collect(Collectors.toMap(Student::getId, s -> s));
+
+		List<Student> studentsToSave = new ArrayList<>();
+		List<StudentAcademicHistory> historyToSave = new ArrayList<>();
+
+		// 2. Iterate and Process
+		for (StudentPromotionDetail detail : request.getStudents()) {
+			Student student = studentMap.get(detail.getStudentId());
+
+			if (student == null)
+				continue; // Skip invalid IDs
+
+			// --- A. ARCHIVE HISTORY (The "Professional" Step) ---
+			// Save their CURRENT state before we change it
+			StudentAcademicHistory history = StudentAcademicHistory.builder()
+					.studentId(student.getId())
+					.academicYear(student.getCurrentAcademicYear()) // The year ending
+					.classId(student.getCurrentClassId())
+					.section(student.getCurrentSection())
+					.result(detail.getPromotionStatus())
+					.promotedAt(System.currentTimeMillis())
+					.build();
+			historyToSave.add(history);
+
+			// --- B. UPDATE STUDENT ---
+			switch (detail.getPromotionStatus()) {
+				case "PROMOTE":
+				case "DEMOTE":
+					student.setCurrentClassId(detail.getTargetClassId());
+					student.setCurrentSection(detail.getTargetSection());
+					break;
+				case "RETAIN":
+					// Class/Section stays same, but they enter the NEW Academic Year
+					break;
+			}
+
+			// Set the NEW Academic Year
+			student.setCurrentAcademicYear(request.getTargetAcademicYear());
+			studentsToSave.add(student);
+		}
+
+		// 3. BATCH SAVE (Performance)
+		if (!historyToSave.isEmpty()) {
+			studentAcademicHistoryRepository.saveAll(historyToSave);
+		}
+
+		if (!studentsToSave.isEmpty()) {
+			List<Student> savedStudents = studentRepository.saveAll(studentsToSave);
+
+			// 4. AUTOMATED FEE TRIGGER (Integration)
+			// Now that students are in the NEW class, generate their fees instantly
+			for (Student s : savedStudents) {
+				try {
+					feeService.assignDefaultFeeStructure(s);
+				} catch (Exception e) {
+					System.err.println("Fee generation failed for " + s.getId());
+					// Don't rollback transaction for fee error, just log it
+				}
+			}
+		}
 	}
 
 	@Override
