@@ -16,3 +16,6 @@ jwt:
 
 app:
   default-tenant-id: default_tenant
+
+audit:
+  enabled: false

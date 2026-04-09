@@ -7,6 +7,8 @@ import com.sms.modules.attendance.domain.UserType;
 import com.sms.modules.attendance.dto.AttendanceCreateRequest;
 import com.sms.modules.attendance.dto.AttendanceResponse;
 import com.sms.modules.attendance.repository.AttendanceRepository;
+import com.sms.modules.audit.domain.AuditAction;
+import com.sms.modules.audit.domain.Auditable;
 import com.sms.modules.staff.domain.Staff;
 import com.sms.modules.staff.repository.StaffRepository;
 import com.sms.modules.student.domain.Student;
@@ -45,6 +47,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 	private final StaffRepository staffRepo; // NEW INJECTION
 	private final MongoTemplate mongoTemplate;
 
+	@Auditable(action = AuditAction.MARK_ATTENDANCE, entity = "ATTENDANCE", captureOldValue = false)
 	@Override
 	@Transactional
 	public AttendanceResponse markAttendance(AttendanceCreateRequest req, String markerId) {
@@ -90,6 +93,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 		// Student fields (ClassId/Section) remain null
 	}
 
+	@Auditable(action = AuditAction.UPDATE_ATTENDANCE, entity = "ATTENDANCE", captureOldValue = true)
 	@Override
 	public AttendanceResponse updateAttendance(String id, AttendanceCreateRequest req, String userId) {
 		Attendance a = attendanceRepo.findById(id).orElseThrow(() -> new RuntimeException("Attendance not found"));
@@ -120,6 +124,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 				.map(this::toResponse);
 	}
 
+	@Auditable(action = AuditAction.DELETE_ATTENDANCE, entity = "ATTENDANCE", captureOldValue = true)
 	@Override
 	public void deleteAttendance(String id) {
 		attendanceRepo.deleteById(id);
@@ -131,6 +136,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 				.updatedAt(a.getUpdatedAt()).userType(a.getUserType()).build();
 	}
 
+	@Auditable(action = AuditAction.MARK_BULK_ATTENDANCE, entity = "ATTENDANCE", captureOldValue = false)
 	@Override
 	@Transactional
 	public List<AttendanceResponse> markBulkAttendance(List<AttendanceCreateRequest> reqList, String markerId) {
