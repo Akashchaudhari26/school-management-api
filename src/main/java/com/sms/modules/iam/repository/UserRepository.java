@@ -7,6 +7,7 @@ import com.sms.modules.iam.domain.User;
 import java.util.Optional;
 
 public interface UserRepository extends MongoRepository<User, String> {
+    Optional<User> findByUserId(String userId);
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
     boolean existsByMobile(String mobile);

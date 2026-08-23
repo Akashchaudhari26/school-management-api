@@ -1,9 +1,12 @@
 package com.sms.config;
 
 import com.sms.modules.iam.repository.UserRepository;
+import com.sms.modules.setup.service.SetupService;
 import com.sms.security.JwtAuthenticationFilter;
 import com.sms.security.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,13 +20,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final SetupService setupService;
+    private final UserRepository userRepository;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -43,15 +45,30 @@ public class SecurityConfig {
                 .cors(cors -> {
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/actuator/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html")
-                        .permitAll()
-                        .anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers(
+                            "/actuator/**",
+                            "/v3/api-docs/**",
+                            "/swagger-ui/**",
+                            "/swagger-ui.html")
+                            .permitAll();
+
+                    if (!setupService.getStatus().initialized()) {
+
+                        auth.requestMatchers("/api/setup/**")
+                                .permitAll();
+
+                        auth.anyRequest().permitAll();
+
+                    } else {
+
+                        auth.requestMatchers("/api/auth/**")
+                                .permitAll();
+
+                        auth.anyRequest()
+                                .authenticated();
+                    }
+                })
                 .addFilterBefore(
                         jwtAuthenticationFilter(),
                         UsernamePasswordAuthenticationFilter.class);

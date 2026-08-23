@@ -6,6 +6,7 @@ import com.sms.modules.iam.service.PasswordResetService;
 import com.sms.modules.iam.service.OtpService;
 import com.sms.modules.iam.service.EmailService;
 import com.sms.modules.iam.domain.User;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +42,11 @@ public class AuthController {
     public ResponseEntity<?> requestPasswordReset(@RequestParam String email) {
         passwordResetService.createPasswordResetToken(email);
         return ResponseEntity.ok("Reset token sent (console/email)");
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<PasswordResetResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(passwordResetService.resetPassword(request));
     }
 
     @PostMapping("/reset-password")

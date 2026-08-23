@@ -54,7 +54,7 @@ public class User {
 
     private String status; // ACTIVE / INACTIVE / SUSPENDED
 
-    private String roleName;
+    private RoleName roleName;
 
     private List<String> permissions; // extra perms
 
@@ -66,5 +66,6 @@ public class User {
 
     private Instant createdAt;
     private Instant updatedAt;
+    private Instant passwordChangedAt;
 
 }

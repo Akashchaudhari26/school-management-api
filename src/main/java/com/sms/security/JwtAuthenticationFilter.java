@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
+import java.time.Instant;
 import java.util.Optional;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -46,6 +47,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (ou.isPresent()) {
                     User user = ou.get();
+                    Instant passwordChangedAt = user.getPasswordChangedAt();
+                    if (passwordChangedAt != null && tokenProvider.getClaims(jwt).getIssuedAt().toInstant()
+                            .isBefore(passwordChangedAt)) {
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
                     var authorities = user.getPermissions().stream()
                             .map(SimpleGrantedAuthority::new)
                             .toList();

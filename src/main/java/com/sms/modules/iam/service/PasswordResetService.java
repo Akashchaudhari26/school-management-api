@@ -1,10 +1,13 @@
 package com.sms.modules.iam.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.sms.modules.iam.domain.PasswordResetToken;
 import com.sms.modules.iam.domain.User;
+import com.sms.modules.iam.dto.ForgotPasswordRequest;
+import com.sms.modules.iam.dto.PasswordResetResponse;
 import com.sms.modules.iam.repository.PasswordResetTokenRepository;
 import com.sms.modules.iam.repository.UserRepository;
 
@@ -23,6 +26,41 @@ public class PasswordResetService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private static final String RESET_RESPONSE = "If the account exists, the password has been reset successfully";
+
+    public PasswordResetResponse resetPassword(ForgotPasswordRequest request) {
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("New password and confirmation password must match");
+        }
+
+        String identifier = request.getIdentifier().trim();
+        Optional<User> user = findUser(identifier);
+        if (user.isEmpty()) {
+            return new PasswordResetResponse(RESET_RESPONSE);
+        }
+
+        User account = user.get();
+        Instant changedAt = Instant.ofEpochMilli(System.currentTimeMillis());
+        account.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        account.setPasswordChangedAt(changedAt);
+        account.setUpdatedAt(changedAt);
+        userRepository.save(account);
+        return new PasswordResetResponse(RESET_RESPONSE);
+    }
+
+    private Optional<User> findUser(String identifier) {
+        Optional<User> user = userRepository.findByUserId(identifier);
+        if (user.isPresent()) return user;
+
+        user = userRepository.findByEmail(identifier.toLowerCase());
+        if (user.isPresent()) return user;
+
+        return userRepository.findByMobile(identifier);
+    }
 
     public String createPasswordResetToken(String email) {
         User u = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
@@ -49,7 +87,7 @@ public class PasswordResetService {
 
         User u = userRepository.findById(prt.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
         // update password
-        u.setPassword(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode(newPassword));
+        u.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(u);
 
         prt.setUsed(true);

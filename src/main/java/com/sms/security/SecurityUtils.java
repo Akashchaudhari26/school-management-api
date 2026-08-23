@@ -33,7 +33,7 @@ public final class SecurityUtils {
 
 	public static String getCurrentRole() {
 		User user = getCurrentUser();
-		return user != null ? user.getRoleName() : null;
+		return user != null ? user.getRoleName().name() : null;
 	}
 
 	public static String getTenantId() {
