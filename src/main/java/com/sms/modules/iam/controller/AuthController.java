@@ -52,7 +52,8 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
         boolean ok = passwordResetService.resetPassword(token, newPassword);
-        if (ok) return ResponseEntity.ok("Password reset successful");
+        if (ok)
+            return ResponseEntity.ok("Password reset successful");
         return ResponseEntity.badRequest().body("Invalid or expired token");
     }
 
@@ -65,9 +66,11 @@ public class AuthController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestParam String userId, @RequestParam String otp, @RequestParam String purpose) {
+    public ResponseEntity<?> verifyOtp(@RequestParam String userId, @RequestParam String otp,
+            @RequestParam String purpose) {
         boolean ok = otpService.validateOtp(userId, otp, purpose);
-        if (ok) return ResponseEntity.ok("OTP verified");
+        if (ok)
+            return ResponseEntity.ok("OTP verified");
         return ResponseEntity.badRequest().body("Invalid/expired OTP");
     }
 }

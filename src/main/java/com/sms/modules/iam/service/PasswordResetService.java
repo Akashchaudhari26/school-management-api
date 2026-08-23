@@ -54,10 +54,12 @@ public class PasswordResetService {
 
     private Optional<User> findUser(String identifier) {
         Optional<User> user = userRepository.findByUserId(identifier);
-        if (user.isPresent()) return user;
+        if (user.isPresent())
+            return user;
 
         user = userRepository.findByEmail(identifier.toLowerCase());
-        if (user.isPresent()) return user;
+        if (user.isPresent())
+            return user;
 
         return userRepository.findByMobile(identifier);
     }
@@ -81,9 +83,11 @@ public class PasswordResetService {
 
     public boolean resetPassword(String token, String newPassword) {
         Optional<PasswordResetToken> ot = tokenRepository.findByToken(token);
-        if (ot.isEmpty()) return false;
+        if (ot.isEmpty())
+            return false;
         PasswordResetToken prt = ot.get();
-        if (prt.isUsed() || prt.getExpiry().isBefore(Instant.now())) return false;
+        if (prt.isUsed() || prt.getExpiry().isBefore(Instant.now()))
+            return false;
 
         User u = userRepository.findById(prt.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
         // update password
