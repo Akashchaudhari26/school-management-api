@@ -1,7 +1,9 @@
 package com.sms.security;
 
 import com.sms.modules.iam.domain.User;
+import com.sms.modules.iam.domain.RoleName;
 import com.sms.modules.iam.repository.UserRepository;
+import com.sms.modules.iam.service.PermissionRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,6 +22,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -53,9 +57,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         filterChain.doFilter(request, response);
                         return;
                     }
-                    var authorities = user.getPermissions().stream()
+                    List<String> permissions = user.getPermissions() == null
+                            ? new ArrayList<>()
+                            : new ArrayList<>(user.getPermissions());
+                    if (RoleName.SUPER_ADMIN.equals(user.getRoleName())) {
+                        permissions.addAll(PermissionRegistry.all());
+                    }
+
+                    var authorities = permissions.stream()
                             .map(SimpleGrantedAuthority::new)
-                            .toList();
+                            .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+                    if (user.getRoleName() != null) {
+                        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRoleName().name()));
+                    }
 
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             user, null, authorities);
