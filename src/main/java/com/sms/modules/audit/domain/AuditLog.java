@@ -1,31 +1,36 @@
 package com.sms.modules.audit.domain;
 
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 
 import java.time.Instant;
-import java.util.Map;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "audit_logs")
+@Entity
+@Table(name = "audit_logs", indexes = @Index(name = "idx_audit_expiry", columnList = "expiry_at"))
 public class AuditLog {
 
     @Id
+
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-
-    @Indexed
     private String tenantId;
-
-    @Indexed
     private String entityName; // STUDENT, FEE, ATTENDANCE
     private String entityId;
-
-    @Indexed
+    @Enumerated(EnumType.STRING)
     private AuditAction action;
 
     private String performedByUserId;
@@ -34,12 +39,13 @@ public class AuditLog {
     private Instant performedAt;
 
     // Full diff
+    @JdbcTypeCode(SqlTypes.JSON)
     private Object oldValue;
+    @JdbcTypeCode(SqlTypes.JSON)
     private Object newValue;
 
     private String message;
 
     // Auto-expire after 1 year
-    @Indexed(expireAfterSeconds = 31536000) // 365 days
     private Instant expiryAt;
 }

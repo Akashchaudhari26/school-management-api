@@ -1,14 +1,19 @@
 package com.sms.modules.payroll.domain;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-@Document(collection = "payroll_transactions")
+@Entity
+@Table(name = "payroll_transactions")
 public class PayrollTransaction {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String staffId;
     private String staffName; // Cached for easier reporting

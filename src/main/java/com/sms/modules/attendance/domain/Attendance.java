@@ -1,10 +1,10 @@
 package com.sms.modules.attendance.domain;
 
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.Instant;
 
@@ -13,22 +13,22 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document("attendance")
-@CompoundIndex(name = "user_date_idx", def = "{'userId': 1, 'date': 1}", unique = true)
+@Entity
+@Table(name = "attendance", uniqueConstraints = @jakarta.persistence.UniqueConstraint(name = "uk_attendance_user_date", columnNames = {
+        "user_id", "date" }))
 public class Attendance {
 
     @Id
+
+    @jakarta.persistence.GeneratedValue(strategy = jakarta.persistence.GenerationType.UUID)
     private String id;
-
-    @Indexed
     private String userId; // Can be StudentID or StaffID
-
-    @Indexed
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
     private UserType userType; // NEW: ENUM (STUDENT, STAFF)
 
     // --- Student Specific Context ---
-    private String classId;   // Null for Staff
-    private String section;   // Null for Staff
+    private String classId; // Null for Staff
+    private String section; // Null for Staff
     private String currentAcademicYear;
 
     // --- Staff Specific Context ---
@@ -37,6 +37,7 @@ public class Attendance {
 
     // --- Common ---
     private LocalDate date;
+    @Enumerated(jakarta.persistence.EnumType.STRING)
     private AttendanceStatus status;
     private String remarks;
     private String markedBy;
@@ -44,6 +45,6 @@ public class Attendance {
 
     private Instant createdAt;
     private Instant updatedAt;
-    
+
     private String staffType;
 }

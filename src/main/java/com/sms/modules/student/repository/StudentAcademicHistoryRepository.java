@@ -1,9 +1,9 @@
 package com.sms.modules.student.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.sms.modules.student.domain.StudentAcademicHistory;
 
-public interface StudentAcademicHistoryRepository extends MongoRepository<StudentAcademicHistory, String> {
+public interface StudentAcademicHistoryRepository extends JpaRepository<StudentAcademicHistory, String> {
 
 }

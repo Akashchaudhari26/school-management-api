@@ -1,21 +1,32 @@
 package com.sms.modules.staff.domain;
 
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "staff")
+@Entity
+@Table(name = "staff")
 public class Staff {
 
     @Id
+
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     private String fullName;
@@ -23,22 +34,23 @@ public class Staff {
     private String mobile;
     private String gender;
     private LocalDate dateOfBirth;
-
-    @Indexed(unique = true)
+    @Column(unique = true)
     private String adhaar;
 
     private String staffType; // TEACHER | NON_TEACHING
     private String designation;
     private LocalDate joiningDate;
-
-    @Indexed(unique = true)
+    @Column(unique = true)
     private String employeeCode;
 
     // Teacher-specific fields
+    @JdbcTypeCode(SqlTypes.JSON)
     private List<String> subjects;
+    @JdbcTypeCode(SqlTypes.JSON)
     private List<String> assignedClassIds;
 
     private String tenantId;
 
+    @Enumerated(EnumType.STRING)
     private StaffStatus status;
 }

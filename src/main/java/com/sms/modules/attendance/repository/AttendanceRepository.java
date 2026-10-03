@@ -6,8 +6,8 @@ import com.sms.modules.student.domain.Student;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface AttendanceRepository extends MongoRepository<Attendance, String> {
+public interface AttendanceRepository extends JpaRepository<Attendance, String> {
 
     // Prevent duplicates
     Optional<Attendance> findByUserIdAndDate(String userId, LocalDate date);
@@ -45,12 +45,15 @@ public interface AttendanceRepository extends MongoRepository<Attendance, String
 
     Page<Attendance> findByUserTypeAndDate(UserType userType, LocalDate date, Pageable pageable);
     
-    @Query("{ 'classId': ?0, 'section': ?1, 'date': { $gte: ?2, $lte: ?3 } }")
+    @Query("SELECT a FROM Attendance a WHERE a.classId = ?1 AND a.section = ?2 AND a.date BETWEEN ?3 AND ?4")
     List<Attendance> findByClassIdAndSectionIdAndDateBetween(String classId, String sectionId, LocalDate startDate, LocalDate endDate);
     
     List<Attendance> findByDateAfter(LocalDate date);
     
-    @Query("{ 'userType': ?0, 'date': { $gte: ?1, $lte: ?2 } }")
+    @Query("SELECT a FROM Attendance a WHERE a.userType = ?1 AND a.date BETWEEN ?2 AND ?3")
     List<Attendance> findByUserTypeAndDateBetween(UserType userType, LocalDate startDate, LocalDate endDate);
+
+    @Query("SELECT a.status, COUNT(a) FROM Attendance a WHERE a.date = ?1 AND a.userType = ?2 GROUP BY a.status")
+    List<Object[]> countByDateAndUserTypeGroupedByStatus(LocalDate date, UserType userType);
   
 }

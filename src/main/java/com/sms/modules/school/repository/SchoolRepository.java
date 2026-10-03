@@ -1,11 +1,11 @@
 package com.sms.modules.school.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.sms.modules.school.domain.School;
 
 @Repository
-public interface SchoolRepository extends MongoRepository<School, String> {
+public interface SchoolRepository extends JpaRepository<School, String> {
     boolean existsBy();
 }

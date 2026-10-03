@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sms.modules.fees.domain.ClassFeeMaster;
-import com.sms.modules.fees.domain.FeeItem;
+import com.sms.modules.fees.domain.ClassFeeItem;
 import com.sms.modules.fees.repository.ClassFeeMasterRepository;
 
 @RestController
@@ -28,7 +28,7 @@ public class FeeMasterController {
     public ResponseEntity<ClassFeeMaster> defineClassFee(@RequestBody ClassFeeMaster request) {
         // Calculate Total automatically before saving
         BigDecimal total = request.getFeeItems().stream()
-                .map(FeeItem::getAmount)
+                .map(ClassFeeItem::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         request.setTotalAmount(total);
 

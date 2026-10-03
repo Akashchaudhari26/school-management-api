@@ -6,6 +6,8 @@ import org.springframework.core.io.Resource;
 
 public interface FileStorageService {
     String storeFile(MultipartFile file, String filename) throws IOException;
-    Resource loadFileAsResource(String gridFsId);
-    void deleteFile(String gridFsId);
+
+    Resource loadFileAsResource(String storageKey);
+
+    void deleteFile(String storageKey);
 }

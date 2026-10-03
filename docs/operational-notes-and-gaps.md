@@ -6,7 +6,7 @@ The repository contains a substantial implementation of a school management syst
 
 - Modular domain services
 - JWT-based security
-- MongoDB persistence
+- PostgreSQL persistence through Spring Data JPA and Flyway
 - Student, staff, fee, attendance, payroll, and exam flows
 - PDF receipt generation
 - Audit logging support

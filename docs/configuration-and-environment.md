@@ -6,7 +6,7 @@ The runtime configuration is defined in [src/main/resources/application.yml](../
 
 ### Observed Configuration Areas
 
-- MongoDB connection settings
+- PostgreSQL connection settings
 - Server port
 - JWT settings
 - Audit enablement toggle
@@ -20,7 +20,9 @@ The project uses:
 - Java 17
 - Spring Boot 3.3.3
 - Lombok
-- Spring Data MongoDB
+- Spring Data JPA
+- PostgreSQL JDBC
+- Flyway
 - Validation starter
 - Mail starter
 - OpenAPI/Swagger support
@@ -28,7 +30,7 @@ The project uses:
 
 ## Environment Considerations
 
-For local development, the application expects the MongoDB configuration to be available through the application configuration. This includes any Atlas or hosted MongoDB connection string.
+The `postgres` Spring profile is the default. Set `DATABASE_URL`, `DATABASE_USERNAME`, and `DATABASE_PASSWORD` for PostgreSQL, and set `JWT_SECRET` for token signing. The schema is managed by Flyway and Hibernate validates the mapped tables on startup.
 
 ## Deployment Notes
 

@@ -1,10 +1,19 @@
 package com.sms.modules.iam.domain;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import jakarta.persistence.Table;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,16 +22,21 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 import java.util.List;
 
-@Document(collection = "roles")
+@Entity
+@EntityListeners(AuditingEntityListener.class)
+@Table(name = "roles", uniqueConstraints = @jakarta.persistence.UniqueConstraint(name = "uk_role_name_tenant", columnNames = {
+        "name", "tenant_id" }))
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@CompoundIndex(name = "uk_role_name_tenant", def = "{'name':1,'tenantId':1}", unique = true)
 public class Role {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+    @Enumerated(EnumType.STRING)
     private RoleName name; // ADMIN, TEACHER, PARENT, STUDENT, ACCOUNTANT, PRINCIPAL
     private String description;
+    @JdbcTypeCode(SqlTypes.JSON)
     private List<String> permissions;
     private boolean isDefault;
     private String tenantId;

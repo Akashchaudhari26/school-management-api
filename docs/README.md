@@ -4,7 +4,7 @@ This document set was created from source inspection of the Spring Boot applicat
 
 ## Project Scope
 
-This repository contains a modular school management system implemented in Java with Spring Boot and MongoDB. The application includes modules for identity and access management, student and staff management, attendance, fees, exams, payroll, school configuration, and audit logging.
+This repository contains a modular school management system implemented in Java with Spring Boot and PostgreSQL. The application includes modules for identity and access management, student and staff management, attendance, fees, exams, payroll, school configuration, and audit logging.
 
 ## Key Evidence
 
@@ -26,3 +26,4 @@ The documentation below is based on the following source files:
 - [Persistence and Data Model](./persistence-and-data-model.md)
 - [Validation, Exceptions, and Error Handling](./validation-exceptions-and-error-handling.md)
 - [Operational Notes and Gaps](./operational-notes-and-gaps.md)
+- [PostgreSQL Migration](./postgres-migration.md)

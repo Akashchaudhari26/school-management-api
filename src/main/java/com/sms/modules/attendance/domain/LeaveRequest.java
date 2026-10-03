@@ -4,20 +4,32 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import jakarta.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Document(collection = "leave_requests")
+@Entity
+@EntityListeners(AuditingEntityListener.class)
+@Table(name = "leave_requests")
 @Data // Lombok
 @NoArgsConstructor
 @AllArgsConstructor
 public class LeaveRequest {
 
     @Id
+
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     private String userId;
@@ -29,9 +41,11 @@ public class LeaveRequest {
     private LocalDate endDate;
     private int days;
 
+    @Enumerated(EnumType.STRING)
     private LeaveType leaveType;
     private String reason;
 
+    @Enumerated(EnumType.STRING)
     private LeaveStatus status = LeaveStatus.PENDING;
 
     @CreatedDate

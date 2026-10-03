@@ -15,18 +15,12 @@ import com.sms.modules.student.domain.Student;
 import com.sms.modules.student.repository.StudentRepository;
 import com.sms.security.SecurityUtils;
 
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.security.access.AccessDeniedException;
 
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +39,6 @@ public class AttendanceServiceImpl implements AttendanceService {
 	private final AttendanceRepository attendanceRepo;
 	private final StudentRepository studentRepo; // INJECT THIS
 	private final StaffRepository staffRepo; // NEW INJECTION
-	private final MongoTemplate mongoTemplate;
 
 	@Auditable(action = AuditAction.MARK_ATTENDANCE, entity = "ATTENDANCE", captureOldValue = false)
 	@Override
@@ -246,25 +239,8 @@ public class AttendanceServiceImpl implements AttendanceService {
 	@Override
 	public AttendanceSummaryStats getDailyStats(UserType userType, LocalDate date) {
 
-		// 1. Aggregation Pipeline
-		Aggregation aggregation = newAggregation(
-				// Match: Filter by Date and UserType
-				match(Criteria.where("date").is(date).and("userType").is(userType)),
-
-				// Group: Count by Status
-				group("status").count().as("count"),
-
-				// Project: Map '_id' (which is the status) to a field named 'status'
-				project("count").and("_id").as("status"));
-
-		// 2. Execute (Do not wrap in try-catch indiscriminately)
-		AggregationResults<StatusCount> results = mongoTemplate.aggregate(aggregation, "attendance", StatusCount.class);
-
-		// 3. Convert List to Map for easy lookup (Handles missing statuses
-		// automatically)
-		// Key: Status (PRESENT), Value: Count (15)
-		java.util.Map<AttendanceStatus, Long> counts = results.getMappedResults().stream()
-				.collect(java.util.stream.Collectors.toMap(StatusCount::getStatus, StatusCount::getCount));
+		Map<AttendanceStatus, Long> counts = attendanceRepo.countByDateAndUserTypeGroupedByStatus(date, userType)
+				.stream().collect(Collectors.toMap(row -> (AttendanceStatus) row[0], row -> (Long) row[1]));
 
 		// 4. Extract Values (Default to 0 if not found)
 		long present = counts.getOrDefault(com.sms.modules.attendance.domain.AttendanceStatus.PRESENT, 0L);
@@ -313,10 +289,4 @@ public class AttendanceServiceImpl implements AttendanceService {
 				.map(this::toResponse)
 				.toList();
 	}
-}
-
-@Data
-class StatusCount {
-	private AttendanceStatus status;
-	private long count;
 }

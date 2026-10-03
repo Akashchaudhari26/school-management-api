@@ -1,0 +1,13 @@
+# PostgreSQL connection settings for the application.
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/schooldb}
+    username: ${DATABASE_USERNAME:schooldb}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true

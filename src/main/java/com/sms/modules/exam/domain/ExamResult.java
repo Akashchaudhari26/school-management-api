@@ -4,20 +4,24 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
+import jakarta.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "exam_results")
+@Entity
+@Table(name = "exam_results")
 // Index for fast Report Card generation: Find all marks for Student X in Year Y
-@CompoundIndex(name = "student_year_idx", def = "{'studentId': 1, 'academicYear': 1}")
 public class ExamResult {
 
     @Id
+
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     private String studentId; // Link to Student

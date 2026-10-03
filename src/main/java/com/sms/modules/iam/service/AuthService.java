@@ -12,14 +12,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.sms.modules.iam.domain.Role;
+import com.sms.modules.iam.domain.RoleName;
 import com.sms.modules.iam.domain.User;
 import com.sms.modules.iam.dto.AuthResponse;
 import com.sms.modules.iam.dto.LoginRequest;
 import com.sms.modules.iam.dto.RegisterUserRequest;
 import com.sms.modules.iam.repository.RoleRepository;
 import com.sms.modules.iam.repository.UserRepository;
-import com.sms.modules.student.domain.GuardianRef;
-import com.sms.modules.student.domain.Student;
 import com.sms.modules.student.repository.StudentRepository;
 import com.sms.security.JwtTokenProvider;
 
@@ -100,7 +99,8 @@ public class AuthService {
 		}
 
 		// 2. Fetch Role
-		Role role = roleRepository.findByName(req.getRoleName())
+		RoleName roleName = RoleName.valueOf(req.getRoleName().trim().toUpperCase());
+		Role role = roleRepository.findByName(roleName)
 				.orElseThrow(() -> new RuntimeException("Role not found: " + req.getRoleName()));
 
 		User u = new User();

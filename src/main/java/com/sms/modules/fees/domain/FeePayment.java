@@ -4,17 +4,20 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import org.springframework.data.mongodb.core.index.Indexed;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Embeddable
 public class FeePayment {
-    @Indexed(unique = true)
-    private String	  receiptNo;
-    private BigDecimal	  amountPaid;
-    private String	  mode;	      // CASH, UPI, CARD
-    private String	  collectedBy;
+    @Column(unique = true)
+    private String receiptNo;
+    @Column(precision = 12, scale = 2)
+    private BigDecimal amountPaid;
+    private String mode; // CASH, UPI, CARD
+    private String collectedBy;
     private LocalDateTime paidAt;
 }

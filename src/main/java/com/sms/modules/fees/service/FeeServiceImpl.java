@@ -336,7 +336,9 @@ public class FeeServiceImpl implements FeeService {
 		fee.setAcademicYear(student.getCurrentAcademicYear());
 
 		// Copy Items from Master
-		fee.setFeeItems(master.getFeeItems());
+		fee.setFeeItems(master.getFeeItems().stream()
+				.map(item -> new FeeItem(item.getName(), item.getAmount()))
+				.collect(Collectors.toList()));
 
 		// Set Financials
 		fee.setTotalAmount(master.getTotalAmount());

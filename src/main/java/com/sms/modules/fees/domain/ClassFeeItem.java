@@ -2,20 +2,15 @@ package com.sms.modules.fees.domain;
 
 import java.math.BigDecimal;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/** JSON value stored in the class fee master; separate from the FeeItem embeddable. */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Embeddable
-public class FeeItem {
-    private String name; // Tuition, Transport, Exam
-    @Column(precision = 12, scale = 2)
+public class ClassFeeItem {
+    private String name;
     private BigDecimal amount;
 }

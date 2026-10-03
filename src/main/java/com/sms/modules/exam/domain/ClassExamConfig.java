@@ -2,6 +2,9 @@ package com.sms.modules.exam.domain;
 
 import java.util.List;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,5 +15,6 @@ import lombok.NoArgsConstructor;
 public class ClassExamConfig {
     private String className; // e.g., "Class 1" or "10-A" depending on your logic
     private String classId; // Good for querying
+    @JdbcTypeCode(SqlTypes.JSON)
     private List<ExamSubjectSchedule> subjects;
 }

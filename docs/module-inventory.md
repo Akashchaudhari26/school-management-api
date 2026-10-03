@@ -29,7 +29,7 @@ Location: [src/main/java/com/sms/modules/student](../src/main/java/com/sms/modul
 - Student record management
 - Guardian linkage
 - Student search and promotion
-- Student file storage through GridFS
+- Student document metadata and configurable filesystem file storage
 
 ### Key Classes
 
@@ -38,7 +38,7 @@ Location: [src/main/java/com/sms/modules/student](../src/main/java/com/sms/modul
 - StudentRepository
 - Student
 - StudentMapper
-- GridFsFileStorageService
+- LocalFileStorageService
 
 ## 3. Staff Module
 

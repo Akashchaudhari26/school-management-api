@@ -1,15 +1,21 @@
 package com.sms.modules.exam.domain;
 
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 
 @Data
-@Document(collection = "student_achievements")
+@Entity
+@Table(name = "student_achievements")
 public class StudentAchievement {
 
     @Id
+
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     private String studentId;

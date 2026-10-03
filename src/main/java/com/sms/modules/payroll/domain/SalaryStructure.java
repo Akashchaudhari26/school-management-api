@@ -1,14 +1,19 @@
 package com.sms.modules.payroll.domain;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 
 import lombok.Data;
 
-@Document(collection = "salary_structures")
+@Entity
+@Table(name = "salary_structures")
 @Data
 public class SalaryStructure {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String staffId; // Foreign Key to your Staff Collection
     private String staffName; // Cached for easier reporting

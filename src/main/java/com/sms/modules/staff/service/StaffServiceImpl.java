@@ -1,6 +1,7 @@
 package com.sms.modules.staff.service;
 
 import com.sms.modules.iam.dto.RegisterUserRequest;
+import com.sms.modules.iam.domain.RoleName;
 import com.sms.modules.iam.repository.RoleRepository;
 import com.sms.modules.iam.service.AuthService;
 import com.sms.modules.staff.domain.Staff;
@@ -12,11 +13,8 @@ import com.sms.modules.staff.repository.StaffRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,9 +25,6 @@ public class StaffServiceImpl {
 
 	@Autowired
 	private StaffRepository repo;
-
-	@Autowired
-	private MongoTemplate mongoTemplate;
 
 	@Autowired
 	private AuthService authService;
@@ -43,9 +38,12 @@ public class StaffServiceImpl {
 		staff.setEmployeeCode(newCode);
 
 		Staff savedStaff = repo.save(staff);
-		if (savedStaff != null && roleRepository.findByName(savedStaff.getDesignation()).isPresent()) {
-			RegisterUserRequest registerRequest = RegisterUserRequest.mapStaffToUserRequest(savedStaff);
-			authService.register(registerRequest);
+		if (savedStaff != null) {
+			RoleName roleName = parseRoleName(savedStaff.getDesignation());
+			if (roleName != null && roleRepository.findByName(roleName).isPresent()) {
+				RegisterUserRequest registerRequest = RegisterUserRequest.mapStaffToUserRequest(savedStaff);
+				authService.register(registerRequest);
+			}
 		}
 		return StaffMapper.toDto(staff);
 	}
@@ -81,44 +79,23 @@ public class StaffServiceImpl {
 	}
 
 	public Page<StaffResponse> searchStaff(StaffSearchFilter filter, Pageable pageable) {
-		List<Criteria> criteriaList = new ArrayList<>();
-
-		// 🔍 Keyword search (name, admission number)
-		if (filter.getKeyword() != null && !filter.getKeyword().isBlank()) {
-			String keyword = filter.getKeyword().trim();
-			criteriaList.add(new Criteria().orOperator(Criteria.where("fullName").regex(keyword, "i"),
-					Criteria.where("email").regex(keyword, "i"), Criteria.where("mobile").regex(keyword, "i"),
-					Criteria.where("adhaar").regex(keyword, "i"), Criteria.where("employeeCode").regex(keyword, "i")));
-		}
-
-		if (filter.getStaffType() != null) {
-			criteriaList.add(Criteria.where("staffType").is(filter.getStaffType()));
-		}
-
-		if (filter.getDesignation() != null) {
-			criteriaList.add(Criteria.where("designation").is(filter.getDesignation()));
-		}
-
-		if (filter.getGender() != null) {
-			criteriaList.add(Criteria.where("gender").is(filter.getGender()));
-		}
-
-		Criteria criteria = new Criteria();
-		if (!criteriaList.isEmpty()) {
-			criteria.andOperator(criteriaList.toArray(new Criteria[0]));
-		}
-
-		Query query = new Query(criteria).with(pageable);
-
-		// 📄 Fetch data
-		List<Staff> staff = mongoTemplate.find(query, Staff.class);
-
-		// 📊 Count query (IMPORTANT)
-		long total = mongoTemplate.count(Query.of(query).limit(-1).skip(-1), Staff.class);
-
-		List<StaffResponse> responses = staff.stream().map(StaffMapper::toDto).toList();
-
-		return new PageImpl<>(responses, pageable, total);
+		Specification<Staff> specification = (root, query, criteriaBuilder) -> {
+			List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+			if (filter.getKeyword() != null && !filter.getKeyword().isBlank()) {
+				String keyword = "%" + filter.getKeyword().trim().toLowerCase() + "%";
+				predicates.add(criteriaBuilder.or(
+						criteriaBuilder.like(criteriaBuilder.lower(root.get("fullName")), keyword),
+						criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), keyword),
+						criteriaBuilder.like(criteriaBuilder.lower(root.get("mobile")), keyword),
+						criteriaBuilder.like(criteriaBuilder.lower(root.get("adhaar")), keyword),
+						criteriaBuilder.like(criteriaBuilder.lower(root.get("employeeCode")), keyword)));
+			}
+			if (filter.getStaffType() != null) predicates.add(criteriaBuilder.equal(root.get("staffType"), filter.getStaffType()));
+			if (filter.getDesignation() != null) predicates.add(criteriaBuilder.equal(root.get("designation"), filter.getDesignation()));
+			if (filter.getGender() != null) predicates.add(criteriaBuilder.equal(root.get("gender"), filter.getGender()));
+			return criteriaBuilder.and(predicates.toArray(jakarta.persistence.criteria.Predicate[]::new));
+		};
+		return repo.findAll(specification, pageable).map(StaffMapper::toDto);
 	}
 
 	private synchronized String generateEmployeeCode(String staffType) {
@@ -159,6 +136,15 @@ public class StaffServiceImpl {
 		} catch (Exception e) {
 			// Fallback for safety
 			return prefix + System.currentTimeMillis();
+		}
+	}
+
+	private RoleName parseRoleName(String designation) {
+		if (designation == null || designation.isBlank()) return null;
+		try {
+			return RoleName.valueOf(designation.trim().toUpperCase().replace(" ", "_"));
+		} catch (IllegalArgumentException exception) {
+			return null;
 		}
 	}
 }

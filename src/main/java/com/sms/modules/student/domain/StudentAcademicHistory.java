@@ -2,14 +2,23 @@ package com.sms.modules.student.domain;
 
 import lombok.Data;
 import lombok.Builder;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import jakarta.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 
 @Data
 @Builder
-@Document(collection = "student_academic_history")
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = "student_academic_history")
 public class StudentAcademicHistory {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     private String studentId;

@@ -2,7 +2,7 @@
 
 ## Application Type
 
-This is a Spring Boot 3.3.3 application written in Java 17. The application uses Maven as the build tool and MongoDB as its primary data store.
+This is a Spring Boot 3.3.3 application written in Java 17. The application uses Maven, Spring Data JPA, PostgreSQL, and Flyway schema migrations.
 
 ## Main Application Entry Point
 
@@ -16,7 +16,7 @@ The project is organized as a modular monolith-style Spring application. Busines
 
 - Controllers: expose REST endpoints
 - Services: implement business logic
-- Repositories: persist and retrieve domain entities from MongoDB
+- Repositories: persist and retrieve domain entities through Spring Data JPA
 - Domain objects: represent business entities and value objects
 - DTOs: carry data between layers
 - Mappers: translate between DTOs and entities
@@ -42,7 +42,7 @@ A typical request flows through:
 
 1. Controller receives HTTP request
 2. Service implements domain logic
-3. Repository interacts with MongoDB
+3. Repository interacts with PostgreSQL
 4. Response DTO is returned to the client
 
 ## Cross-Cutting Concerns
@@ -54,4 +54,4 @@ The codebase includes implementation for the following cross-cutting concerns:
 - Exception handling via a centralized exception handler
 - Auditing when enabled
 - Caching support
-- File storage via MongoDB GridFS for student-related files
+- Student files use a configurable filesystem storage provider; production multi-instance deployments should use shared/object storage

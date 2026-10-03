@@ -1,12 +1,12 @@
 package com.sms.modules.exam.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.sms.modules.exam.domain.ExamResult;
 
 import java.util.List;
 
-public interface ExamResultRepository extends MongoRepository<ExamResult, String> {
+public interface ExamResultRepository extends JpaRepository<ExamResult, String> {
 
     // Find marks for a specific "Sheet" (e.g., Class 10-A, Math, Mid-Term)
     List<ExamResult> findByClassIdAndAcademicYearAndExamNameAndSubjectName(String classId, String academicYear,

@@ -1,16 +1,12 @@
 package com.sms.modules.student.service;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +27,8 @@ import com.sms.modules.student.mapper.StudentMapper;
 import com.sms.modules.student.repository.StudentAcademicHistoryRepository;
 import com.sms.modules.student.repository.StudentRepository;
 
+import jakarta.persistence.criteria.Predicate;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,9 +43,6 @@ public class StudentServiceImpl implements StudentService {
 	private StudentRepository studentRepository;
 
 	@Autowired
-	private MongoTemplate mongoTemplate;
-
-	@Autowired
 	private AuthService authService;
 
 	@Autowired
@@ -60,6 +55,7 @@ public class StudentServiceImpl implements StudentService {
 	FeeService feeService;
 
 	@Override
+	@Transactional
 	public StudentResponse createStudent(StudentCreateRequest request, String createdBy) {
 		Student s = StudentMapper.toEntity(request);
 		if (s.getAdmissionNumber() == null || s.getAdmissionNumber().isBlank()) {
@@ -96,6 +92,7 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	@Cacheable(value = "students", key = "#id")
 	public StudentResponse getStudent(String id) {
 		Student s = studentRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
@@ -103,68 +100,31 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public Page<StudentResponse> searchStudents(StudentSearchFilter filter, Pageable pageable) {
-		// Simple example: search by name or admission number using repository custom
-		// methods
-		// For now use findAll pageable and filter in memory for demonstration (replace
-		// with proper text index)
-		List<Criteria> criteriaList = new ArrayList<>();
-
-		// 🔍 Keyword search (name, admission number)
-		if (filter.getKeyword() != null && !filter.getKeyword().isBlank()) {
-
-			String keyword = filter.getKeyword().trim();
-			List<Criteria> orCriteria = new ArrayList<>();
-
-			// Text search
-			orCriteria.add(Criteria.where("firstName").regex(keyword, "i"));
-			orCriteria.add(Criteria.where("lastName").regex(keyword, "i"));
-			orCriteria.add(Criteria.where("admissionNumber").regex(keyword, "i"));
-
-			// ID search (only if valid ObjectId)
-			if (ObjectId.isValid(keyword)) {
-				orCriteria.add(Criteria.where("_id").is(new ObjectId(keyword)));
+		Specification<Student> specification = (root, query, criteriaBuilder) -> {
+			List<Predicate> predicates = new ArrayList<>();
+			if (filter.getKeyword() != null && !filter.getKeyword().isBlank()) {
+				String keyword = "%" + filter.getKeyword().trim().toLowerCase() + "%";
+				predicates.add(criteriaBuilder.or(
+						criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), keyword),
+						criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), keyword),
+						criteriaBuilder.like(criteriaBuilder.lower(root.get("admissionNumber")), keyword),
+						criteriaBuilder.equal(root.get("id"), filter.getKeyword().trim())));
 			}
-
-			criteriaList.add(new Criteria().orOperator(orCriteria.toArray(new Criteria[0])));
-		}
-
-		if (filter.getClassId() != null) {
-			criteriaList.add(Criteria.where("currentClassId").is(filter.getClassId()));
-		}
-
-		if (filter.getSection() != null) {
-			criteriaList.add(Criteria.where("currentSection").is(filter.getSection()));
-		}
-
-		if (filter.getStatus() != null) {
-			criteriaList.add(Criteria.where("status").is(filter.getStatus()));
-		}
-
-		if (filter.getAdmissionYear() != null) {
-			criteriaList.add(Criteria.where("admissionYear").is(filter.getAdmissionYear()));
-		}
-
-		if (filter.getGender() != null) {
-			criteriaList.add(Criteria.where("gender").is(filter.getGender()));
-		}
-
-		Criteria criteria = new Criteria();
-		if (!criteriaList.isEmpty()) {
-			criteria.andOperator(criteriaList.toArray(new Criteria[0]));
-		}
-
-		Query query = new Query(criteria).with(pageable);
-
-		// 📄 Fetch data
-		List<Student> students = mongoTemplate.find(query, Student.class);
-
-		// 📊 Count query (IMPORTANT)
-		long total = mongoTemplate.count(Query.of(query).limit(-1).skip(-1), Student.class);
-
-		List<StudentResponse> responses = students.stream().map(StudentMapper::toDto).toList();
-
-		return new PageImpl<>(responses, pageable, total);
+			if (filter.getClassId() != null)
+				predicates.add(criteriaBuilder.equal(root.get("currentClassId"), filter.getClassId()));
+			if (filter.getSection() != null)
+				predicates.add(criteriaBuilder.equal(root.get("currentSection"), filter.getSection()));
+			if (filter.getStatus() != null)
+				predicates.add(criteriaBuilder.equal(root.get("status"), filter.getStatus()));
+			if (filter.getAdmissionYear() != null)
+				predicates.add(criteriaBuilder.equal(root.get("admissionYear"), filter.getAdmissionYear()));
+			if (filter.getGender() != null)
+				predicates.add(criteriaBuilder.equal(root.get("gender"), filter.getGender()));
+			return criteriaBuilder.and(predicates.toArray(jakarta.persistence.criteria.Predicate[]::new));
+		};
+		return studentRepository.findAll(specification, pageable).map(StudentMapper::toDto);
 	}
 
 	@Override
@@ -315,6 +275,7 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<StudentResponse> getMyChildren(String parentUserId) {
 		return studentRepository.findByGuardiansIamUserId(parentUserId).stream().map(StudentMapper::toDto).toList();
 	}
@@ -336,7 +297,16 @@ public class StudentServiceImpl implements StudentService {
 
 			// Step C: Link the Student's Guardian entry to this User ID
 			// (This uses your custom @Update query to set iamUserId)
-			studentRepository.linkGuardianToIamUser(guardian.getAdharNumber(), user.getId());
+			List<Student> linkedStudents = studentRepository.findByGuardiansAdharNumber(guardian.getAdharNumber());
+			for (Student student : linkedStudents) {
+				for (GuardianRef studentGuardian : student.getGuardians()) {
+					if (guardian.getAdharNumber().equals(studentGuardian.getAdharNumber())
+							&& (studentGuardian.getIamUserId() == null || studentGuardian.getIamUserId().isBlank())) {
+						studentGuardian.setIamUserId(user.getId());
+					}
+				}
+			}
+			studentRepository.saveAll(linkedStudents);
 
 		} catch (Exception e) {
 			// Log error but don't fail student creation?
