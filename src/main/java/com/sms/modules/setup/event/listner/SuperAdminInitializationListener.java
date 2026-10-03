@@ -22,10 +22,19 @@ public class SuperAdminInitializationListener {
     @EventListener
     public void handle(SetupInitializationEvent event) {
 
+        String email = event.request().admin().email().trim().toLowerCase();
+        var existingAdmin = userService.getByEmail(email);
+        if (existingAdmin.isPresent()) {
+            if (RoleName.SUPER_ADMIN.equals(existingAdmin.get().getRoleName())) {
+                return;
+            }
+            throw new IllegalStateException("The setup email is already assigned to another role.");
+        }
+
         User admin = new User();
 
         admin.setFullName(event.request().admin().fullName());
-        admin.setEmail(event.request().admin().email());
+        admin.setEmail(email);
         admin.setMobile(event.request().admin().mobile());
         admin.setAdharNumber("000000000000");
         admin.setPassword(passwordEncoder.encode(event.request().admin().password()));

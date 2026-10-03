@@ -1,7 +1,9 @@
 package com.sms.modules.schoolConfig.controller;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.sms.modules.schoolConfig.domain.*;
 import com.sms.modules.schoolConfig.service.SchoolConfigService;
@@ -28,8 +30,10 @@ public class SchoolConfigController {
     }
 
     @GetMapping("/academic-year/active")
-    public AcademicYear getActiveYear() {
-        return configService.getActiveAcademicYear();
+    public ResponseEntity<AcademicYear> getActiveYear() {
+        Optional<AcademicYear> activeYear = configService.getActiveAcademicYear();
+        return activeYear.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     // --- CLASSES ---

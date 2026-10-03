@@ -1,6 +1,8 @@
 package com.sms.modules.student.mapper;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.sms.modules.student.domain.Student;
 import com.sms.modules.student.domain.StudentStatus;
@@ -43,7 +45,7 @@ public class StudentMapper {
         r.setStatus(s.getStatus());
         r.setCurrentClassId(s.getCurrentClassId());
         r.setCurrentSection(s.getCurrentSection());
-        r.setGuardians(s.getGuardians());
+        r.setGuardians(s.getGuardians() == null ? List.of() : new ArrayList<>(s.getGuardians()));
         r.setCurrentClassId(s.getCurrentClassId());
         r.setCurrentSection(s.getCurrentSection());
         r.setCurrentAcademicYear(s.getCurrentAcademicYear());

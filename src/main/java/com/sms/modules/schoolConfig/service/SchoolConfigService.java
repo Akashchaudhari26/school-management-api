@@ -1,6 +1,7 @@
 package com.sms.modules.schoolConfig.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -111,9 +112,8 @@ public class SchoolConfigService {
     }
 
     // @Cacheable(value = "active_year")
-    public AcademicYear getActiveAcademicYear() {
-        return yearRepository.findByIsActiveTrue()
-                .orElseThrow(() -> new RuntimeException("No active academic year configured"));
+    public Optional<AcademicYear> getActiveAcademicYear() {
+        return yearRepository.findByIsActiveTrue();
     }
 
     @Cacheable(value = "active_year")

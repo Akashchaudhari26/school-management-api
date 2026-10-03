@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.sms.modules.iam.domain.User;
 import com.sms.modules.student.dto.PromotionRequest;
+import com.sms.modules.student.dto.PageResponse;
 import com.sms.modules.student.dto.StudentCreateRequest;
 import com.sms.modules.student.dto.StudentResponse;
 import com.sms.modules.student.dto.StudentSearchFilter;
@@ -45,13 +46,13 @@ public class StudentController {
 
     @PreAuthorize("hasAnyAuthority('STUDENT_READ_CLASS', 'STUDENT_READ')")
     @PostMapping("/search")
-    public ResponseEntity<Page<StudentResponse>> search(@RequestBody StudentSearchFilter filter) {
+    public ResponseEntity<PageResponse<StudentResponse>> search(@RequestBody StudentSearchFilter filter) {
         Pageable pageable = PageRequest.of(
                 filter.getPage(),
                 filter.getSize(),
                 Sort.by(filter.getDirection(), filter.getSortBy()));
 
-        return ResponseEntity.ok(studentService.searchStudents(filter, pageable));
+        return ResponseEntity.ok(PageResponse.from(studentService.searchStudents(filter, pageable)));
     }
 
     @PreAuthorize("hasAuthority('STUDENT_UPDATE')")

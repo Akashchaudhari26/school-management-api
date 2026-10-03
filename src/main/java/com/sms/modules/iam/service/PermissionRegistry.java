@@ -212,6 +212,23 @@ public final class PermissionRegistry {
                 Permissions.SCHOOL_UPDATE,
 
                 Permissions.SYSTEM_SETTINGS_VIEW,
-                Permissions.SYSTEM_SETTINGS_UPDATE);
+                Permissions.SYSTEM_SETTINGS_UPDATE,
+
+                // Compatibility authorities still referenced by protected controllers.
+                "STAFF_ADD",
+                "STAFF_READ",
+                "STAFF_UPDATE",
+                "STAFF_DELETE",
+                "STUDENT_READ",
+                "STUDENT_READ_CLASS",
+                "STUDENT_READ_SELF_CHILD",
+                "ATTENDANCE_CREATE",
+                "ATTENDANCE_READ",
+                "ATTENDANCE_READ_ALL",
+                "ATTENDANCE_READ_SELF_CHILD",
+                "LEAVE_APPLY",
+                "LEAVE_APPROVE",
+                "FEE_MANAGE_ALL",
+                "FEE_READ");
     }
 }

@@ -43,55 +43,66 @@ public class RoleService {
 
         List<Role> roles = new ArrayList<>();
 
-        roles.add(createRole(
+        addRoleIfMissing(roles,
                 RoleName.SUPER_ADMIN,
                 PermissionRegistry.all(),
                 "Has complete access to the application.",
-                tenantId));
+                tenantId);
 
-        roles.add(createRole(
+        addRoleIfMissing(roles,
                 RoleName.ADMIN,
                 PermissionRegistry.admin(),
                 "School Administrator.",
-                tenantId));
+                tenantId);
 
-        roles.add(createRole(
+        addRoleIfMissing(roles,
                 RoleName.PRINCIPAL,
                 PermissionRegistry.principal(),
                 "School Principal.",
-                tenantId));
+                tenantId);
 
-        roles.add(createRole(
+        addRoleIfMissing(roles,
                 RoleName.TEACHER,
                 PermissionRegistry.teacher(),
                 "Teacher.",
-                tenantId));
+                tenantId);
 
-        roles.add(createRole(
+        addRoleIfMissing(roles,
                 RoleName.STUDENT,
                 PermissionRegistry.student(),
                 "Student.",
-                tenantId));
+                tenantId);
 
-        roles.add(createRole(
+        addRoleIfMissing(roles,
                 RoleName.PARENT,
                 PermissionRegistry.parent(),
                 "Parent.",
-                tenantId));
+                tenantId);
 
-        roles.add(createRole(
+        addRoleIfMissing(roles,
                 RoleName.ACCOUNTANT,
                 PermissionRegistry.accountant(),
                 "Accountant.",
-                tenantId));
+                tenantId);
 
-        roles.add(createRole(
+        addRoleIfMissing(roles,
                 RoleName.RECEPTIONIST,
                 PermissionRegistry.receptionist(),
                 "Receptionist.",
-                tenantId));
+                tenantId);
 
         roleRepository.saveAll(roles);
+    }
+
+    private void addRoleIfMissing(
+            List<Role> roles,
+            RoleName name,
+            List<String> permissions,
+            String description,
+            String tenantId) {
+        if (!roleRepository.existsByNameAndTenantId(name, tenantId)) {
+            roles.add(createRole(name, permissions, description, tenantId));
+        }
     }
 
     private Role createRole(
